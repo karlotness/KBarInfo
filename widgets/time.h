@@ -6,7 +6,7 @@
 
 extern kbar_widget_state kbar_time_state;
 
-gboolean kbar_time_init(GMainLoop *main_loop);
+gboolean kbar_time_init();
 void kbar_time_free();
 
 #endif
