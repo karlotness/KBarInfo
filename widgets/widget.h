@@ -9,4 +9,7 @@ typedef struct kbar_widget_state {
   gboolean urgent;
 } kbar_widget_state;
 
+void kbar_widget_state_init(kbar_widget_state *state);
+void kbar_widget_state_release(kbar_widget_state *state);
+
 #endif
