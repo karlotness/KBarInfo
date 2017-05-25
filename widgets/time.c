@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdio.h>
 
+#include "../utils/state.h"
 #include "time.h"
 
 #define TIME_FMT "%a %b %d - %I:%M %p %Z"
@@ -29,6 +30,7 @@ static gboolean kbar_time_tick(void *data) {
                             kbar_time_state.text->allocated_len,
                             TIME_FMT, tmp);
     if(ttlen > 0) {
+      kbar_print_bar_state();
       return G_SOURCE_CONTINUE;
     }
     gsize time_len = kbar_time_state.text->allocated_len;
