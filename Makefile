@@ -1,6 +1,6 @@
 CC ?= gcc
 CFLAGS = -O0 -std=gnu99 -flto -fuse-linker-plugin
-LIBS = glib-2.0 json-glib-1.0
+LIBS = glib-2.0
 COMP_CFLAGS = $(CFLAGS) $(shell pkg-config --cflags $(LIBS))
 LDFLAGS = $(CFLAGS) $(shell pkg-config --libs --cflags $(LIBS))
 HEADS := $(wildcard */*.h *.h)
