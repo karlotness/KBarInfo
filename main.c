@@ -1,10 +1,11 @@
 #include <glib.h>
 #include <glib-unix.h>
+#include <stdio.h>
 
+#include "utils/state.h"
 #include "widgets/time.h"
 
 gboolean interrupt_handler(void *data);
-
 GMainLoop *main_loop;
 
 int main(int argc, char *argv[]) {
@@ -12,7 +13,11 @@ int main(int argc, char *argv[]) {
   gboolean time_status = kbar_time_init(main_loop);
   // Configure interrupt signal
   g_unix_signal_add(SIGINT, &interrupt_handler, NULL);
+  kbar_start_print();
+  kbar_initialized = TRUE;
+  kbar_print_bar_state();
   g_main_loop_run(main_loop);
+  kbar_end_print();
   kbar_time_free();
 }
 
