@@ -1,5 +1,6 @@
 #include "../utils/state.h"
 #include "../utils/dbus.h"
+#include "../utils/debug.h"
 #include "power.h"
 
 #define BATTERY_DBUS_NAME "org.freedesktop.UPower"
@@ -17,6 +18,7 @@ static void kbar_power_signal(GDBusProxy *proxy, GVariant *changed,
                               GStrv *invalid, gpointer data);
 
 gboolean kbar_power_init() {
+  kbar_err_printf("ERR %d\n", 6);
   kbar_power_error = FALSE;
   GError *err = NULL;
   kbar_widget_state_init(&kbar_power_state);
@@ -29,7 +31,7 @@ gboolean kbar_power_init() {
                                    NULL,
                                    &err);
   if(err != NULL) {
-    printf("DBus power error: %s\n", err->message);
+    kbar_err_printf("DBus power error: %s\n", err->message);
     kbar_power_error = TRUE;
     goto exit;
   }
@@ -38,7 +40,7 @@ gboolean kbar_power_init() {
                                           G_CALLBACK(&kbar_power_signal),
                                           NULL);
   if(kbar_power_sig == 0) {
-    printf("Power: Error attaching signal\n");
+    kbar_err_printf("Power: Error attaching signal\n");
     kbar_power_error = TRUE;
     goto exit;
   }
