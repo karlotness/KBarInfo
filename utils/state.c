@@ -1,28 +1,29 @@
 #include <stdio.h>
 
 #include "state.h"
-#include "../widgets/widget.h"
 #include "../widgets/time.h"
+#include "../widgets/power.h"
 
-#define KBAR_NUM_WIDGETS 1
-const kbar_widget_state *states[1] = {&kbar_time_state};
+#define KBAR_NUM_WIDGETS 2
+const kbar_widget_state *states[2] = {&kbar_time_state,
+                                      &kbar_power_state};
 
 static void kbar_json_escape(GString *str);
 gboolean kbar_initialized = FALSE;
 
 void kbar_start_print() {
-  puts("[");
+  printf("{\"version\": 1 }\n[");
 }
 
 void kbar_end_print() {
-  puts("[]]");
+  printf("[]]\n");
 }
 
 void kbar_print_bar_state() {
   if(!kbar_initialized) {
     return;
   }
-  puts("[");
+  printf("[");
   for(int i = 0; i < KBAR_NUM_WIDGETS; i++) {
     const kbar_widget_state *state = states[i];
     char* urgent = state->urgent ? "true" : "false";
@@ -30,10 +31,10 @@ void kbar_print_bar_state() {
     printf("{\"urgent\": \"%s\", \"full_text\": \"%s\"}",
            urgent, state->text->str);
     if(i < KBAR_NUM_WIDGETS - 1) {
-      puts(",");
+      printf(", ");
     }
   }
-  puts("],");
+  printf("],\n");
   fflush(stdout);
 }
 
