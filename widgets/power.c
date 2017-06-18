@@ -18,7 +18,6 @@ static void kbar_power_signal(GDBusProxy *proxy, GVariant *changed,
                               GStrv *invalid, gpointer data);
 
 gboolean kbar_power_init() {
-  kbar_err_printf("ERR %d\n", 6);
   kbar_power_error = FALSE;
   GError *err = NULL;
   kbar_widget_state_init(&kbar_power_state);
