@@ -5,8 +5,8 @@
 #include "../widgets/power.h"
 
 #define KBAR_NUM_WIDGETS 2
-const kbar_widget_state *states[2] = {&kbar_time_state,
-                                      &kbar_power_state};
+const kbar_widget_state *states[2] = {&kbar_power_state,
+                                      &kbar_time_state};
 
 static void kbar_json_escape(GString *str);
 gboolean kbar_initialized = FALSE;
