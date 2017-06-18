@@ -57,7 +57,7 @@ void kbar_power_free() {
 static void kbar_power_update() {
   if(kbar_power_error) {
     kbar_power_state.urgent = TRUE;
-    g_string_printf(kbar_power_state.text, "P: err");
+    g_string_assign(kbar_power_state.text, "P: err");
     kbar_print_bar_state();
     return;
   }
