@@ -16,6 +16,6 @@ kbarinfo: $(SRC:.c=.o)
 
 clean: $(CLEANTARGS)
 	rm -f kbarinfo
-	rm -f *~ */*~ */*.o
+	rm -f *~ */*~ */*.o *.o
 
 .PHONY: clean
