@@ -6,6 +6,7 @@
 #include "utils/dbus.h"
 #include "widgets/time.h"
 #include "widgets/power.h"
+#include "widgets/volume.h"
 
 gboolean interrupt_handler(void *data);
 GMainLoop *main_loop;
@@ -15,6 +16,7 @@ int main(int argc, char *argv[]) {
   main_loop = g_main_loop_new(NULL, FALSE);
   gboolean time_status = kbar_time_init();
   gboolean power_status = kbar_power_init();
+  gboolean volume_status = kbar_volume_init();
   // Configure interrupt signal
   g_unix_signal_add(SIGINT, &interrupt_handler, NULL);
   kbar_start_print();
@@ -24,6 +26,7 @@ int main(int argc, char *argv[]) {
   kbar_end_print();
   kbar_time_free();
   kbar_power_free();
+  kbar_volume_free();
   kbar_dbus_free();
 }
 
