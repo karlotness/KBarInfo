@@ -11,4 +11,6 @@ void kbar_dbus_init() {
 void kbar_dbus_free() {
   g_dbus_connection_close_sync(kbar_system_bus, NULL, NULL);
   g_dbus_connection_close_sync(kbar_session_bus, NULL, NULL);
+  g_object_unref(kbar_system_bus);
+  g_object_unref(kbar_session_bus);
 }
