@@ -7,7 +7,6 @@
 #define DBUS_PROPERTY_INTERFACE "org.freedesktop.DBus.Properties"
 
 extern GDBusConnection *kbar_system_bus;
-extern GDBusConnection *kbar_session_bus;
 
 void kbar_dbus_init();
 void kbar_dbus_free();
