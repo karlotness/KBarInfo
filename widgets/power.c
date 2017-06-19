@@ -49,9 +49,9 @@ gboolean kbar_power_init() {
 }
 
 void kbar_power_free() {
-  kbar_widget_state_release(&kbar_power_state);
   g_signal_handler_disconnect(batt_obj, kbar_power_sig);
   g_object_unref(batt_obj);
+  kbar_widget_state_release(&kbar_power_state);
 }
 
 static void kbar_power_update() {
