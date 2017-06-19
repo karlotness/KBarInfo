@@ -29,7 +29,7 @@ void kbar_print_bar_state() {
     const kbar_widget_state *state = states[i];
     char* urgent = state->urgent ? "true" : "false";
     kbar_json_escape(state->text);
-    printf("{\"urgent\": \"%s\", \"full_text\": \"%s\"}",
+    printf("{\"urgent\": %s, \"full_text\": \"%s\"}",
            urgent, state->text->str);
     if(i < KBAR_NUM_WIDGETS - 1) {
       printf(", ");
