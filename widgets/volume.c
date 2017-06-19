@@ -36,9 +36,9 @@ gboolean kbar_volume_init() {
 
 void kbar_volume_free() {
   pa_context_disconnect(pa_ctx);
-  kbar_widget_state_release(&kbar_volume_state);
   pa_glib_mainloop_free(pa_main);
   pa_context_unref(pa_ctx);
+  kbar_widget_state_release(&kbar_volume_state);
 }
 
 static void kbar_volume_connection_cb(pa_context *c, void *userdata) {
@@ -46,15 +46,16 @@ static void kbar_volume_connection_cb(pa_context *c, void *userdata) {
   if(state == PA_CONTEXT_READY) {
     // Connection established. Subscribe to events
     kbar_volume_error = FALSE;
-    pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK,
-                         NULL, NULL);
+    pa_operation *op = pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK,
+                                            NULL, NULL);
+    pa_operation_unref(op);
     // Get initial volume values (so we don't wait for change)
     kbar_volume_event_cb(c,
                          PA_SUBSCRIPTION_EVENT_SINK |
                          PA_SUBSCRIPTION_EVENT_CHANGE,
                          0, NULL);
   }
-  else {
+  else if(state != PA_CONTEXT_TERMINATED) {
     kbar_volume_error = TRUE;
     kbar_volume_update();
   }
@@ -70,7 +71,9 @@ static void kbar_volume_event_cb(pa_context *c,
     // We are not interested in this event.
     return;
   }
-  pa_context_get_server_info(c, &kbar_volume_server_info_cb, NULL);
+  pa_operation *op =
+    pa_context_get_server_info(c, &kbar_volume_server_info_cb, NULL);
+  pa_operation_unref(op);
 }
 
 static void kbar_volume_server_info_cb(pa_context *c,
@@ -78,8 +81,10 @@ static void kbar_volume_server_info_cb(pa_context *c,
                                        void *userdata) {
   // Got default sink name. Query for volume
   const char* default_sink = i->default_sink_name;
-  pa_context_get_sink_info_by_name(c, default_sink,
-                                   &kbar_volume_sink_info_cb, NULL);
+  pa_operation *op =
+    pa_context_get_sink_info_by_name(c, default_sink,
+                                     &kbar_volume_sink_info_cb, NULL);
+  pa_operation_unref(op);
 }
 
 static void kbar_volume_sink_info_cb(pa_context *c,
