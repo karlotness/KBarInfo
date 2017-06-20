@@ -100,7 +100,6 @@ static void kbar_network_nm_state_sig(GDBusProxy *proxy,
   }
   // Connect to the relevant objects
   for(gsize i = 0; i < len; i++) {
-    kbar_err_printf("linking\n");
     GError *err = NULL;
     active_conns[i] = g_dbus_proxy_new_sync(kbar_system_bus,
                                             G_DBUS_PROXY_FLAGS_NONE,
@@ -179,7 +178,6 @@ static void kbar_network_nm_conn_sig(GDBusProxy *proxy,
   }
   kbar_network_error = FALSE;
   kbar_network_update();
-  kbar_err_printf("%s     %s\n", ssid->str, vpn->str);
 }
 
 static void kbar_network_update() {
@@ -190,6 +188,9 @@ static void kbar_network_update() {
     return;
   }
   gchar* c_str;
+  if(g_strcmp0(ssid->str, "") == 0) {
+    g_string_assign(ssid, "--");
+  }
   if(nm_state <= 50 && nm_state >= 40) {
     c_str = "~";
   }
