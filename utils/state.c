@@ -15,7 +15,7 @@ static void kbar_json_escape(GString *str);
 gboolean kbar_initialized = FALSE;
 
 void kbar_start_print() {
-  printf("{\"version\": 1 }\n[");
+  printf("{\"version\": 1, \"stop_signal\": 10, \"cont_signal\": 12}\n[");
 }
 
 void kbar_end_print() {

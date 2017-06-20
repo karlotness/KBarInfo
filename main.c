@@ -10,6 +10,7 @@
 #include "widgets/network.h"
 
 gboolean interrupt_handler(void *data);
+gboolean signal_ignore(void *data);
 GMainLoop *main_loop;
 
 int main(int argc, char *argv[]) {
@@ -21,6 +22,8 @@ int main(int argc, char *argv[]) {
   gboolean network_status = kbar_network_init();
   // Configure interrupt signal
   g_unix_signal_add(SIGINT, &interrupt_handler, NULL);
+  g_unix_signal_add(SIGUSR1, &signal_ignore, NULL);
+  g_unix_signal_add(SIGUSR2, &signal_ignore, NULL);
   kbar_start_print();
   kbar_initialized = TRUE;
   kbar_print_bar_state();
@@ -36,4 +39,8 @@ int main(int argc, char *argv[]) {
 gboolean interrupt_handler(void *data) {
   g_main_loop_quit(main_loop);
   return G_SOURCE_REMOVE;
+}
+
+gboolean signal_ignore(void *data) {
+
 }
