@@ -192,7 +192,7 @@ static void kbar_network_update() {
     g_string_assign(ssid, "--");
   }
   if(nm_state <= 50 && nm_state >= 40) {
-    c_str = "~";
+    c_str = "~ ";
   }
   else {
     c_str = " ";
