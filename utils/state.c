@@ -4,10 +4,12 @@
 #include "../widgets/time.h"
 #include "../widgets/power.h"
 #include "../widgets/volume.h"
+#include "../widgets/network.h"
 
-#define KBAR_NUM_WIDGETS 3
+#define KBAR_NUM_WIDGETS 4
 const kbar_widget_state *states[KBAR_NUM_WIDGETS] =
-  {&kbar_volume_state, &kbar_power_state, &kbar_time_state};
+  {&kbar_network_state, &kbar_volume_state,
+   &kbar_power_state, &kbar_time_state};
 
 static void kbar_json_escape(GString *str);
 gboolean kbar_initialized = FALSE;
