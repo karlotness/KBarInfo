@@ -45,6 +45,9 @@ gboolean kbar_power_init() {
   }
  exit:
   kbar_power_update();
+  if(err != NULL) {
+    g_error_free(err);
+  }
   return !kbar_power_error;
 }
 
