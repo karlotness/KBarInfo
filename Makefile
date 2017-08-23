@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS = -O3 -std=gnu99 -flto -fuse-linker-plugin -ggdb3
-LIBS = glib-2.0 gio-2.0 libpulse-mainloop-glib
+LIBS = glib-2.0 gio-2.0 libpulse-mainloop-glib libnm
 COMP_CFLAGS = $(CFLAGS) $(shell pkg-config --cflags $(LIBS))
 LDFLAGS = $(CFLAGS) $(shell pkg-config --libs --cflags $(LIBS))
 HEADS := $(wildcard */*.h *.h)
