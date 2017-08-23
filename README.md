@@ -17,6 +17,7 @@ version. See LICENSE.txt for the license text.
 Building this application depends on:
 - glib2
 - libpulse
+- libnm
 
 Gathering status information requires that you use the above software
 to control your system (NetworkManager, PulseAudio, UPower).
