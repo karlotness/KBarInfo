@@ -20,6 +20,7 @@
 #ifndef UTILS_DEBUG_H
 #define UTILS_DEBUG_H
 
-int kbar_err_printf(const char *format, ...);
+int kbar_err_printf(const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
 
 #endif
