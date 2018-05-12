@@ -19,6 +19,7 @@
 #include <glib.h>
 #include <glib-unix.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "utils/state.h"
 #include "utils/dbus.h"
@@ -38,6 +39,10 @@ int main(int argc, char *argv[]) {
   gboolean power_status = kbar_power_init();
   gboolean volume_status = kbar_volume_init();
   gboolean network_status = kbar_network_init();
+  if(!time_status || !power_status || !volume_status ||
+     !network_status) {
+    exit(3);
+  }
   // Configure interrupt signal
   g_unix_signal_add(SIGINT, &interrupt_handler, NULL);
   g_unix_signal_add(SIGUSR1, &signal_ignore, NULL);
