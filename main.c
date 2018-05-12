@@ -65,5 +65,5 @@ gboolean interrupt_handler(void *data) {
 }
 
 gboolean signal_ignore(void *data) {
-
+  return G_SOURCE_CONTINUE;
 }
