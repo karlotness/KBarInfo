@@ -60,7 +60,8 @@ void kbar_volume_free() {
   kbar_widget_state_release(&kbar_volume_state);
 }
 
-static void kbar_volume_connection_cb(pa_context *c, void *userdata) {
+static void kbar_volume_connection_cb(pa_context *c,
+                                      __attribute__((unused)) void *userdata) {
   pa_context_state_t state = pa_context_get_state(c);
   if(state == PA_CONTEXT_READY) {
     // Connection established. Subscribe to events
@@ -82,7 +83,8 @@ static void kbar_volume_connection_cb(pa_context *c, void *userdata) {
 
 static void kbar_volume_event_cb(pa_context *c,
                                  pa_subscription_event_type_t t,
-                                 uint32_t idx, void *userdata) {
+                                 __attribute__((unused)) uint32_t idx,
+                                 __attribute__((unused)) void *userdata) {
   // A Sink event was fired. Get default sink name.
   pa_subscription_event_type_t ev_mask = PA_SUBSCRIPTION_EVENT_SINK |
     PA_SUBSCRIPTION_EVENT_CHANGE;
@@ -97,7 +99,7 @@ static void kbar_volume_event_cb(pa_context *c,
 
 static void kbar_volume_server_info_cb(pa_context *c,
                                        const pa_server_info *i,
-                                       void *userdata) {
+                                       __attribute__((unused)) void *userdata) {
   // Got default sink name. Query for volume
   const char* default_sink = i->default_sink_name;
   pa_operation *op =
@@ -106,9 +108,10 @@ static void kbar_volume_server_info_cb(pa_context *c,
   pa_operation_unref(op);
 }
 
-static void kbar_volume_sink_info_cb(pa_context *c,
+static void kbar_volume_sink_info_cb(__attribute__((unused)) pa_context *c,
                                      const pa_sink_info *i,
-                                     int eol, void *userdata) {
+                                     int eol,
+                                     __attribute__((unused)) void *userdata) {
   // Got current volume state.
   if(eol > 0) {
     return;

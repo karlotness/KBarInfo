@@ -96,10 +96,10 @@ void kbar_network_free() {
   g_string_free(vpn, TRUE);
 }
 
-static void kbar_network_nm_state_sig(GDBusProxy *proxy,
-                                      GVariant *changed,
-                                      GStrv *invalid,
-                                      gpointer data) {
+static void kbar_network_nm_state_sig(__attribute__((unused)) GDBusProxy *proxy,
+                                      __attribute__((unused)) GVariant *changed,
+                                      __attribute__((unused)) GStrv *invalid,
+                                      __attribute__((unused)) gpointer data) {
   GVariant *state = g_dbus_proxy_get_cached_property(nm_obj,
                                                      "State");
   nm_state = g_variant_get_uint32(state);
@@ -160,10 +160,10 @@ static void kbar_network_free_active_conns() {
   vpn_active = FALSE;
 }
 
-static void kbar_network_nm_conn_sig(GDBusProxy *proxy,
-                                     GVariant *changed,
-                                     GStrv *invalid,
-                                     gpointer data) {
+static void kbar_network_nm_conn_sig(__attribute__((unused)) GDBusProxy *proxy,
+                                     __attribute__((unused)) GVariant *changed,
+                                     __attribute__((unused)) GStrv *invalid,
+                                     __attribute__((unused)) gpointer data) {
   // One of the current connections changed. Re-query all.
   g_string_assign(ssid, "");
   g_string_assign(vpn, "");

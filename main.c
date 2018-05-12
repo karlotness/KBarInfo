@@ -32,7 +32,8 @@ gboolean interrupt_handler(void *data);
 gboolean signal_ignore(void *data);
 GMainLoop *main_loop;
 
-int main(int argc, char *argv[]) {
+int main(__attribute__((unused)) int argc,
+         __attribute__((unused)) char *argv[]) {
   kbar_dbus_init();
   main_loop = g_main_loop_new(NULL, FALSE);
   gboolean time_status = kbar_time_init();
@@ -59,11 +60,11 @@ int main(int argc, char *argv[]) {
   kbar_dbus_free();
 }
 
-gboolean interrupt_handler(void *data) {
+gboolean interrupt_handler(__attribute__((unused)) void *data) {
   g_main_loop_quit(main_loop);
   return G_SOURCE_REMOVE;
 }
 
-gboolean signal_ignore(void *data) {
+gboolean signal_ignore(__attribute__((unused)) void *data) {
   return G_SOURCE_CONTINUE;
 }

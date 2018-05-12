@@ -43,7 +43,7 @@ void kbar_time_free() {
   kbar_widget_state_release(&kbar_time_state);
 }
 
-static gboolean kbar_time_tick(void *data) {
+static gboolean kbar_time_tick(__attribute__((unused)) void *data) {
   GDateTime *g_time = g_date_time_new_now_local();
   if(!g_time) {
     kbar_err_printf("Error getting current time\n");

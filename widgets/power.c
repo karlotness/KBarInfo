@@ -107,7 +107,9 @@ static void kbar_power_update() {
   kbar_print_bar_state();
 }
 
-static void kbar_power_signal(GDBusProxy *proxy, GVariant *changed,
-                              GStrv *invalid, gpointer data) {
+static void kbar_power_signal(__attribute__((unused)) GDBusProxy *proxy,
+                              __attribute__((unused)) GVariant *changed,
+                              __attribute__((unused)) GStrv *invalid,
+                              __attribute__((unused)) gpointer data) {
   kbar_power_update();
 }
