@@ -50,6 +50,7 @@ gboolean kbar_volume_init() {
                                 NULL);
   pa_context_set_subscribe_callback(pa_ctx, &kbar_volume_event_cb, NULL);
   pa_context_connect(pa_ctx, NULL, PA_CONTEXT_NOFLAGS, NULL);
+  return TRUE;
 }
 
 void kbar_volume_free() {

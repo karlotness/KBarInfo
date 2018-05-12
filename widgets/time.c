@@ -35,6 +35,7 @@ gboolean kbar_time_init() {
   kbar_widget_state_init(&kbar_time_state);
   kbar_time_timer = 0;
   kbar_time_tick(NULL);
+  return TRUE;
 }
 
 void kbar_time_free() {
