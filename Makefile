@@ -9,15 +9,13 @@ LDFLAGS = -pie -z now -z relro $(CFLAGS)\
 HEADS := $(wildcard */*.h *.h)
 SRC := $(wildcard */*.c *.c)
 
-include $(wildcard */sub.mk)
-
 kbarinfo: $(SRC:.c=.o)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 %.o: %.c $(HEADS)
 	$(CC) -c $(COMP_CFLAGS) $< -o $@
 
-clean: $(CLEANTARGS)
+clean:
 	rm -f kbarinfo
 	rm -f *~ */*~ */*.o *.o
 
