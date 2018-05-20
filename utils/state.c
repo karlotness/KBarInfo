@@ -47,8 +47,8 @@ void kbar_print_bar_state() {
   printf("[");
   for(int i = 0; i < KBAR_NUM_WIDGETS; i++) {
     const kbar_widget_state *state = states[i];
-    char* urgent = state->urgent ? "true" : "false";
-    gchar* escaped = kbar_json_escape(state->text);
+    char *urgent = state->urgent ? "true" : "false";
+    gchar *escaped = kbar_json_escape(state->text);
     printf("{\"urgent\": %s, \"full_text\": \"%s\"}",
            urgent, escaped == NULL ? "" : escaped);
     g_free(escaped);
