@@ -51,9 +51,7 @@ void kbar_print_bar_state() {
     gchar* escaped = kbar_json_escape(state->text);
     printf("{\"urgent\": %s, \"full_text\": \"%s\"}",
            urgent, escaped == NULL ? "" : escaped);
-    if(escaped != NULL) {
-      g_free(escaped);
-    }
+    g_free(escaped);
     if(i < KBAR_NUM_WIDGETS - 1) {
       printf(", ");
     }
