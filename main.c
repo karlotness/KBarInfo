@@ -18,8 +18,6 @@
  */
 #include <glib.h>
 #include <glib-unix.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "utils/state.h"
 #include "utils/dbus.h"
