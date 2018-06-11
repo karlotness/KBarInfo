@@ -42,7 +42,7 @@ int main(__attribute__((unused)) int argc,
   gboolean network_status = kbar_network_init();
   if(!time_status || !power_status || !volume_status ||
      !network_status) {
-    exit(3);
+    return 3;
   }
   // Configure interrupt signal
   g_unix_signal_add(SIGINT, &interrupt_handler, NULL);
@@ -58,6 +58,7 @@ int main(__attribute__((unused)) int argc,
   kbar_volume_free();
   kbar_network_free();
   kbar_dbus_free();
+  return 0;
 }
 
 gboolean interrupt_handler(__attribute__((unused)) void *data) {
