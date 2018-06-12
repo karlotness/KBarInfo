@@ -205,7 +205,7 @@ static void kbar_network_update() {
     kbar_print_bar_state();
     return;
   }
-  gchar* c_str;
+  gchar *c_str;
   if(g_strcmp0(ssid->str, "") == 0) {
     g_string_assign(ssid, "--");
   }

@@ -101,7 +101,7 @@ static void kbar_volume_server_info_cb(pa_context *c,
                                        const pa_server_info *i,
                                        __attribute__((unused)) void *userdata) {
   // Got default sink name. Query for volume
-  const char* default_sink = i->default_sink_name;
+  const char *default_sink = i->default_sink_name;
   pa_operation *op =
     pa_context_get_sink_info_by_name(c, default_sink,
                                      &kbar_volume_sink_info_cb, NULL);
