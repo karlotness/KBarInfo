@@ -20,11 +20,7 @@
 #include "../utils/debug.h"
 #include "../utils/state.h"
 #include "network.h"
-
-#define NM_DBUS_NAME "org.freedesktop.NetworkManager"
-#define NM_DBUS_INTERFACE NM_DBUS_NAME
-#define NM_DBUS_CONN_INTERFACE "org.freedesktop.NetworkManager.Connection.Active"
-#define NM_DBUS_PATH "/org/freedesktop/NetworkManager"
+#include <NetworkManager.h>
 
 kbar_widget_state kbar_network_state;
 gboolean kbar_network_error, vpn_active;
