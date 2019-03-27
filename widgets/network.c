@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with KBarInfo. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../utils/dbus.h"
-#include "../utils/debug.h"
 #include "../utils/state.h"
 #include "network.h"
 #include <NetworkManager.h>
