@@ -94,6 +94,7 @@ static void kbar_network_nm_conn_sig(__attribute__((unused)) NMClient *cb_client
     goto error;
   }
   vpn = g_string_set_size(vpn, 0);
+  ssid = g_string_set_size(ssid, 0);
   for(guint i = 0; i < connections->len; i++) {
     NMActiveConnection *conn = g_ptr_array_index(connections, i);
     if(!conn) {
@@ -105,8 +106,11 @@ static void kbar_network_nm_conn_sig(__attribute__((unused)) NMClient *cb_client
     if(!type || !name) {
       goto error;
     }
-    if(strncmp(type, "802-11-wireless", 15) == 0) {
-      g_string_assign(ssid, name);
+    if(strncmp(type, "802-11-wireless", 15) == 0 || strncmp(type, "802-3-ethernet", 14) == 0) {
+      if(ssid->len > 0) {
+        g_string_append(ssid, ", ");
+      }
+      g_string_append(ssid, name);
     }
     else if(strncmp(type, "wireguard", 9) == 0 || strncmp(type, "vpn", 3) == 0) {
       if(vpn->len > 0){
