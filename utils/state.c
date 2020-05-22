@@ -35,6 +35,34 @@ const kbar_widget_state *states[KBAR_NUM_WIDGETS] =
 
 static gchar *kbar_json_escape(GString *str);
 gboolean kbar_initialized = FALSE;
+JsonBuilder *builder;
+JsonGenerator *generator;
+GOutputStream *stdout_stream;
+
+gboolean kbar_json_init() {
+  builder = json_builder_new_immutable();
+  generator = json_generator_new();
+  if(generator) {
+    json_generator_set_pretty(generator, FALSE);
+    json_generator_set_indent(generator, 0);
+  }
+  stdout_stream = g_unix_output_stream_new(fileno(stdout), FALSE);
+  return builder && generator && stdout_stream;
+}
+
+void kbar_json_free() {
+  if(builder) {
+    json_builder_reset(builder);
+    g_object_unref(builder);
+  }
+  if (generator) {
+    g_object_unref(generator);
+  }
+  if (stdout_stream) {
+    g_output_stream_close(stdout_stream, NULL, NULL);
+    g_object_unref(stdout_stream);
+  }
+}
 
 void kbar_start_print() {
   printf("{\"version\": 1, \"stop_signal\": 10, \"cont_signal\": 12}\n[");

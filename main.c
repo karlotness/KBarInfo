@@ -34,11 +34,12 @@ int main(__attribute__((unused)) int argc,
          __attribute__((unused)) char *argv[]) {
   kbar_dbus_init();
   main_loop = g_main_loop_new(NULL, FALSE);
+  gboolean json_status = kbar_json_init();
   gboolean time_status = kbar_time_init();
   gboolean power_status = kbar_power_init();
   gboolean volume_status = kbar_volume_init();
   gboolean network_status = kbar_network_init();
-  if(!time_status || !power_status || !volume_status ||
+  if(!json_status || !time_status || !power_status || !volume_status ||
      !network_status) {
     return 3;
   }
@@ -56,6 +57,7 @@ int main(__attribute__((unused)) int argc,
   kbar_volume_free();
   kbar_network_free();
   kbar_dbus_free();
+  kbar_json_free();
   return 0;
 }
 

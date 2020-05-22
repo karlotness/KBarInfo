@@ -24,6 +24,9 @@
 
 extern gboolean kbar_initialized;
 
+gboolean kbar_json_init();
+void kbar_json_free();
+
 void kbar_start_print();
 void kbar_end_print();
 void kbar_print_bar_state();
