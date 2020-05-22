@@ -33,7 +33,6 @@ const kbar_widget_state *states[KBAR_NUM_WIDGETS] =
   {&kbar_network_state, &kbar_volume_state,
    &kbar_power_state, &kbar_time_state};
 
-static gchar *kbar_json_escape(GString *str);
 gboolean kbar_initialized = FALSE;
 JsonBuilder *builder;
 JsonGenerator *generator;
@@ -65,45 +64,54 @@ void kbar_json_free() {
 }
 
 void kbar_start_print() {
-  printf("{\"version\": 1, \"stop_signal\": 10, \"cont_signal\": 12}\n[");
+  json_builder_reset(builder);
+  json_builder_begin_object(builder);
+  json_builder_set_member_name(builder, "version");
+  json_builder_add_int_value(builder, 1);
+  json_builder_set_member_name(builder, "stop_signal");
+  json_builder_add_int_value(builder, SIGUSR1);
+  json_builder_set_member_name(builder, "cont_signal");
+  json_builder_add_int_value(builder, SIGUSR2);
+  json_builder_end_object(builder);
+  JsonNode *node = json_builder_get_root(builder);
+  if(!node) {
+    return;
+  }
+  json_generator_set_root(generator, node);
+  json_generator_to_stream(generator, stdout_stream, NULL, NULL);
+  json_node_unref(node);
+  g_output_stream_printf(stdout_stream, NULL, NULL, NULL, "\n[");
+  g_output_stream_flush(stdout_stream, NULL, NULL);
 }
 
 void kbar_end_print() {
-  printf("[]]\n");
+  g_output_stream_printf(stdout_stream, NULL, NULL, NULL, "[]]\n");
+  g_output_stream_flush(stdout_stream, NULL, NULL);
 }
 
 void kbar_print_bar_state() {
   if(!kbar_initialized) {
     return;
   }
-  printf("[");
+  json_builder_reset(builder);
+  json_builder_begin_array(builder);
   for(int i = 0; i < KBAR_NUM_WIDGETS; i++) {
     const kbar_widget_state *state = states[i];
-    char *urgent = state->urgent ? "true" : "false";
-    gchar *escaped = kbar_json_escape(state->text);
-    printf("{\"urgent\": %s, \"full_text\": \"%s\"}",
-           urgent, escaped == NULL ? "" : escaped);
-    g_free(escaped);
-    if(i < KBAR_NUM_WIDGETS - 1) {
-      printf(", ");
-    }
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "urgent");
+    json_builder_add_boolean_value(builder, state->urgent);
+    json_builder_set_member_name(builder, "full_text");
+    json_builder_add_string_value(builder, state->text->str);
+    json_builder_end_object(builder);
   }
-  printf("],\n");
-  fflush(stdout);
-}
-
-static gchar *kbar_json_escape(GString *str) {
-  if(str->len <= 0) {
-    return NULL;
+  json_builder_end_array(builder);
+  JsonNode *node = json_builder_get_root(builder);
+  if(!node) {
+    return;
   }
-  gchar c;
-  for(gsize loc = 0; loc < str->len && *(str->str + loc) != 0; loc++) {
-    c = *(str->str + loc);
-    if(c < 0x20 || c > 0x7E) {
-      g_string_erase(str, loc, 1);
-      loc--;
-    }
-  }
-  gchar *escaped = g_strescape(str->str, NULL);
-  return escaped;
+  json_generator_set_root(generator, node);
+  json_generator_to_stream(generator, stdout_stream, NULL, NULL);
+  json_node_unref(node);
+  g_output_stream_printf(stdout_stream, NULL, NULL, NULL, ",\n");
+  g_output_stream_flush(stdout_stream, NULL, NULL);
 }
