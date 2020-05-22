@@ -23,6 +23,7 @@
 #include <json-glib/json-glib.h>
 
 #include "state.h"
+#include "debug.h"
 #include "../widgets/time.h"
 #include "../widgets/power.h"
 #include "../widgets/volume.h"
@@ -75,6 +76,7 @@ void kbar_start_print() {
   json_builder_end_object(builder);
   JsonNode *node = json_builder_get_root(builder);
   if(!node) {
+    kbar_err_printf("Error generating initial JSON object.\n");
     return;
   }
   json_generator_set_root(generator, node);
@@ -107,6 +109,7 @@ void kbar_print_bar_state() {
   json_builder_end_array(builder);
   JsonNode *node = json_builder_get_root(builder);
   if(!node) {
+    kbar_err_printf("Error generating status JSON object.\n");
     return;
   }
   json_generator_set_root(generator, node);
