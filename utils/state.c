@@ -17,6 +17,10 @@
  * along with KBarInfo. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
+#include <glib-object.h>
+#include <gio/gio.h>
+#include <gio/gunixoutputstream.h>
+#include <json-glib/json-glib.h>
 
 #include "state.h"
 #include "../widgets/time.h"
