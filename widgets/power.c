@@ -23,7 +23,7 @@
 
 #define BATTERY_DBUS_NAME "org.freedesktop.UPower"
 #define BATTERY_INTERFACE "org.freedesktop.UPower.Device"
-#define BATTERY_PATH "/org/freedesktop/UPower/devices/battery_BAT0"
+#define BATTERY_PATH "/org/freedesktop/UPower/devices/DisplayDevice"
 #define CRITICAL_PERCENTAGE 15
 
 kbar_widget_state kbar_power_state;
