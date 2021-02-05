@@ -16,6 +16,7 @@ version. See LICENSE.txt for the license text.
 ## Dependencies
 Building this application depends on:
 - glib2
+- json-glib
 - libpulse
 - libnm
 
