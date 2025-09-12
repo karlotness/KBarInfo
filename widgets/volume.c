@@ -67,7 +67,7 @@ static void kbar_volume_connection_cb(pa_context *c,
   if(state == PA_CONTEXT_READY) {
     // Connection established. Subscribe to events
     kbar_volume_error = FALSE;
-    pa_operation *op = pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK,
+    pa_operation *op = pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK | PA_SUBSCRIPTION_MASK_SERVER,
                                             &kbar_volume_generic_success_cb, NULL);
     pa_operation_unref(op);
     // Get initial volume values (so we don't wait for change)
@@ -86,11 +86,12 @@ static void kbar_volume_event_cb(pa_context *c,
                                  pa_subscription_event_type_t t,
                                  __attribute__((unused)) uint32_t idx,
                                  __attribute__((unused)) void *userdata) {
-  // A Sink event was fired. Get default sink name.
-  pa_subscription_event_type_t ev_mask = PA_SUBSCRIPTION_EVENT_SINK |
-    PA_SUBSCRIPTION_EVENT_CHANGE;
-  if((t & ev_mask) != ev_mask) {
-    // We are not interested in this event.
+  if((t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) != PA_SUBSCRIPTION_EVENT_SINK && (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) != PA_SUBSCRIPTION_EVENT_SERVER) {
+    // Neither sink nor server event. Not interested
+    return;
+  }
+  if((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) != PA_SUBSCRIPTION_EVENT_CHANGE) {
+    // Not a change event. Not interested
     return;
   }
   pa_operation *op =
