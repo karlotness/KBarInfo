@@ -100,6 +100,11 @@ static void kbar_volume_event_cb(pa_context *c,
 static void kbar_volume_server_info_cb(pa_context *c,
                                        const pa_server_info *i,
                                        __attribute__((unused)) void *userdata) {
+  if(!i) {
+    kbar_volume_error = TRUE;
+    kbar_volume_update();
+    return;
+  }
   // Got default sink name. Query for volume
   const char *default_sink = i->default_sink_name;
   pa_operation *op =
@@ -114,6 +119,11 @@ static void kbar_volume_sink_info_cb(__attribute__((unused)) pa_context *c,
                                      __attribute__((unused)) void *userdata) {
   // Got current volume state.
   if(eol > 0) {
+    return;
+  }
+  if(!i) {
+    kbar_volume_error = TRUE;
+    kbar_volume_update();
     return;
   }
   kbar_volume_percent =
