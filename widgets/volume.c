@@ -35,6 +35,7 @@ static void kbar_volume_event_cb(pa_context *c,
 static void kbar_volume_server_info_cb(pa_context *c,
                                        const pa_server_info *i,
                                        void *userdata);
+static void kbar_volume_generic_success_cb(pa_context *c, int success, void *userdata);
 static void kbar_volume_sink_info_cb(pa_context *c,
                                      const pa_sink_info *i,
                                      int eol, void *userdata);
@@ -67,7 +68,7 @@ static void kbar_volume_connection_cb(pa_context *c,
     // Connection established. Subscribe to events
     kbar_volume_error = FALSE;
     pa_operation *op = pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK,
-                                            NULL, NULL);
+                                            &kbar_volume_generic_success_cb, NULL);
     pa_operation_unref(op);
     // Get initial volume values (so we don't wait for change)
     kbar_volume_event_cb(c,
@@ -131,6 +132,13 @@ static void kbar_volume_sink_info_cb(__attribute__((unused)) pa_context *c,
   kbar_volume_mute = i->mute;
   kbar_volume_error = FALSE;
   kbar_volume_update();
+}
+
+static void kbar_volume_generic_success_cb(__attribute__((unused)) pa_context *c, int success, __attribute__((unused)) void *userdata) {
+  if(!success) {
+    kbar_volume_error = TRUE;
+    kbar_volume_update();
+  }
 }
 
 static gdouble kbar_volume_to_percent(pa_volume_t vol) {
