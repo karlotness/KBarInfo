@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS = -O3 -std=gnu99 -flto -fuse-linker-plugin -Wall -Wextra\
+CFLAGS = -O3 -std=gnu99 -flto -Wall -Wextra\
 	-Werror -Wformat=2 -fstack-protector-strong -fstack-clash-protection\
 	-fcf-protection=full -fPIE -D_FORTIFY_SOURCE=3
 LIBS = glib-2.0 gio-unix-2.0 libpulse-mainloop-glib libnm json-glib-1.0
