@@ -1,4 +1,5 @@
 kbarinfo
 .dir-locals.el
+compile_commands.json
 *.o
 *~
