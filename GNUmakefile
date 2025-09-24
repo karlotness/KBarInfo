@@ -10,7 +10,7 @@ HEADS := $(wildcard src/*.h)
 SRC := $(wildcard src/*.c)
 
 kbarinfo: $(SRC:.c=.o)
-	$(CC) $(LDFLAGS) $^ -o $@ $(LIBFLAGS)
+	$(CC) $(COMP_CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBFLAGS)
 
 %.o: %.c $(HEADS)
 	$(CC) -c $(COMP_CFLAGS) $< -o $@
