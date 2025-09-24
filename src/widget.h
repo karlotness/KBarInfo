@@ -23,6 +23,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <json-glib/json-glib.h>
 
 G_BEGIN_DECLS
 
@@ -31,9 +32,11 @@ G_DECLARE_DERIVABLE_TYPE(KBarWidget, kbar_widget, KBAR, WIDGET, GObject)
 
 struct _KBarWidgetClass {
   GObjectClass parent_class;
+  JsonBuilder *(*build_json)(KBarWidget *self, JsonBuilder *builder);
 };
 
 KBarWidget *kbar_widget_new (void);
+JsonBuilder *kbar_widget_build_json(KBarWidget *self, JsonBuilder *builder);
 
 G_END_DECLS
 

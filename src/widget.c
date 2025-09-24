@@ -72,11 +72,23 @@ static void kbar_widget_finalize(GObject *object) {
   G_OBJECT_CLASS(kbar_widget_parent_class)->finalize(object);
 }
 
+static JsonBuilder *kbar_widget_default_build_json(KBarWidget *self, JsonBuilder *builder) {
+  KBarWidgetPrivate *priv = kbar_widget_get_instance_private(self);
+  builder = json_builder_begin_object(builder);
+  builder = json_builder_set_member_name(builder, "urgent");
+  builder = json_builder_add_boolean_value(builder, priv->urgent);
+  builder = json_builder_set_member_name(builder, "full_text");
+  builder = json_builder_add_string_value(builder, priv->text->str);
+  builder = json_builder_end_object(builder);
+  return builder;
+}
+
 static void kbar_widget_class_init (KBarWidgetClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->set_property = kbar_widget_set_property;
   object_class->get_property = kbar_widget_get_property;
   object_class->finalize = kbar_widget_finalize;
+  klass->build_json = kbar_widget_default_build_json;
   obj_properties[PROP_TEXT] = g_param_spec_string("full-text", "text", "Text to display for this block", "", G_PARAM_READWRITE | G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB);
   obj_properties[PROP_URGENT] = g_param_spec_boolean("urgent", NULL, "This block should be displayed as urgent", FALSE, G_PARAM_READWRITE | G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
@@ -90,4 +102,12 @@ static void kbar_widget_init(KBarWidget *self) {
 
 KBarWidget *kbar_widget_new (void) {
   return g_object_new(KBAR_TYPE_WIDGET, NULL);
+}
+
+JsonBuilder *kbar_widget_build_json(KBarWidget *self, JsonBuilder *builder) {
+  g_return_val_if_fail(KBAR_IS_WIDGET(self), NULL);
+  g_return_val_if_fail(JSON_IS_BUILDER(builder), NULL);
+  KBarWidgetClass *klass = KBAR_WIDGET_GET_CLASS(self);
+  g_return_val_if_fail(klass->build_json != NULL, NULL);
+  return klass->build_json(self, builder);
 }
