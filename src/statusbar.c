@@ -145,6 +145,7 @@ void kbar_statusbar_start_print(KBarStatusBar *self) {
   json_generator_set_root(self->generator, node);
   json_generator_to_stream(self->generator, self->stdout_stream, NULL, NULL);
   json_node_unref(node);
+  node = NULL;
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, "\n[");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
   self->print_started = TRUE;
@@ -166,6 +167,7 @@ void kbar_statusbar_output_state (KBarStatusBar *self) {
   json_generator_set_root(self->generator, node);
   json_generator_to_stream(self->generator, self->stdout_stream, NULL, NULL);
   json_node_unref(node);
+  node = NULL;
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, ",\n");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
 }
