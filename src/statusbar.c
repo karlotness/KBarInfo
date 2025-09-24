@@ -40,13 +40,8 @@ struct _KBarStatusBar {
 
 G_DEFINE_FINAL_TYPE(KBarStatusBar, kbar_statusbar, G_TYPE_OBJECT)
 
-static void kbar_statusbar_finalize(GObject *object) {
+static void kbar_statusbar_dispose(GObject *object) {
   KBarStatusBar *self = KBAR_STATUSBAR(object);
-  // Remove handlers
-  if(self->idle_handler != 0) {
-    g_source_remove(self->idle_handler);
-    self->idle_handler = 0;
-  }
   // Release bar entries
   for(gsize i = 0; i < self->bar_entries->len; i++) {
     struct KBarStatusBarEntry *entry = &g_array_index(self->bar_entries, struct KBarStatusBarEntry, i);
@@ -54,10 +49,23 @@ static void kbar_statusbar_finalize(GObject *object) {
     entry->handler_id = 0;
     g_clear_object(&entry->widget);
   }
+  g_array_remove_range(self->bar_entries, 0, self->bar_entries->len);
+  // Remove idle handlers
+  if(self->idle_handler != 0) {
+    g_source_remove(self->idle_handler);
+    self->idle_handler = 0;
+  }
+  // Reset JSON writers
+  json_builder_reset(self->builder);
+  // Process parent class
+  G_OBJECT_CLASS(kbar_statusbar_parent_class)->dispose(object);
+}
+
+static void kbar_statusbar_finalize(GObject *object) {
+  KBarStatusBar *self = KBAR_STATUSBAR(object);
   g_array_free(self->bar_entries, TRUE);
   self->bar_entries = NULL;
   // Free JSON writers
-  json_builder_reset(self->builder);
   g_clear_object(&self->builder);
   g_clear_object(&self->generator);
   g_output_stream_close(self->stdout_stream, NULL, NULL);
@@ -69,6 +77,7 @@ static void kbar_statusbar_finalize(GObject *object) {
 static void kbar_statusbar_class_init(KBarStatusBarClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->finalize = kbar_statusbar_finalize;
+  object_class->dispose = kbar_statusbar_dispose;
 }
 
 static void kbar_statusbar_init(KBarStatusBar *self) {
