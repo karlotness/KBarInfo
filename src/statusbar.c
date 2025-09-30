@@ -18,7 +18,7 @@
  * along with KBarInfo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include <unistd.h>
 #include <gio/gio.h>
 #include <gio/gunixoutputstream.h>
 #include "statusbar.h"
@@ -87,7 +87,7 @@ static void kbar_statusbar_init(KBarStatusBar *self) {
   self->generator = json_generator_new();
   json_generator_set_pretty(self->generator, FALSE);
   json_generator_set_indent(self->generator, 0);
-  self->stdout_stream = g_unix_output_stream_new(fileno(stdout), FALSE);
+  self->stdout_stream = g_unix_output_stream_new(STDOUT_FILENO, FALSE);
 }
 
 KBarStatusBar *kbar_statusbar_new (void) {
