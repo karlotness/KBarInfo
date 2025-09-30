@@ -18,6 +18,7 @@
  * along with KBarInfo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <signal.h>
 #include <glib.h>
 #include <glib-unix.h>
 #include "statusbar.h"

@@ -18,6 +18,7 @@
  * along with KBarInfo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <signal.h>
 #include <unistd.h>
 #include <gio/gio.h>
 #include <gio/gunixoutputstream.h>
