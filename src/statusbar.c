@@ -45,8 +45,7 @@ static void kbar_statusbar_dispose(GObject *object) {
   // Release bar entries
   for(gsize i = 0; i < self->bar_entries->len; i++) {
     struct KBarStatusBarEntry *entry = &g_array_index(self->bar_entries, struct KBarStatusBarEntry, i);
-    g_signal_handler_disconnect(G_OBJECT(entry->widget), entry->handler_id);
-    entry->handler_id = 0;
+    g_clear_signal_handler(&entry->handler_id, G_OBJECT(entry->widget));
     g_clear_object(&entry->widget);
   }
   g_array_remove_range(self->bar_entries, 0, self->bar_entries->len);
