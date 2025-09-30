@@ -31,7 +31,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(KBarStatusBar, kbar_statusbar, KBAR, STATUSBAR, GObject)
 
 KBarStatusBar *kbar_statusbar_new (void);
-void kbar_statusbar_add_widget (KBarStatusBar *self, KBarWidget *widget);
+void kbar_statusbar_take_widget (KBarStatusBar *self, KBarWidget *widget);
 void kbar_statusbar_start_print(KBarStatusBar *self, gint stop_signal, gint cont_signal);
 void kbar_statusbar_end_print(KBarStatusBar *self);
 void kbar_statusbar_output_state (KBarStatusBar *self);

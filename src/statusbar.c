@@ -111,7 +111,7 @@ static void kbar_status_bar_handle_change_notification([[maybe_unused]] GObject 
   }
 }
 
-void kbar_statusbar_add_widget (KBarStatusBar *self, KBarWidget *widget) {
+void kbar_statusbar_take_widget (KBarStatusBar *self, KBarWidget *widget) {
   g_return_if_fail(KBAR_IS_STATUSBAR(self));
   g_return_if_fail(KBAR_IS_WIDGET(widget));
   struct KBarStatusBarEntry new_entry;

@@ -45,7 +45,7 @@ int main(void) {
   guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_ignore, NULL);
   // Construct widgets
   KBarStatusBar *status_bar = kbar_statusbar_new();
-  kbar_statusbar_add_widget(status_bar, KBAR_WIDGET(kbar_widget_time_new()));
+  kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_time_new()));
   // Run loop
   kbar_statusbar_start_print(status_bar, SIGUSR1, SIGUSR2);
   kbar_statusbar_output_state(status_bar);
