@@ -18,7 +18,6 @@
  * along with KBarInfo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <signal.h>
 #include <unistd.h>
 #include <gio/gio.h>
 #include <gio/gunixoutputstream.h>
@@ -129,7 +128,7 @@ void kbar_statusbar_end_print(KBarStatusBar *self) {
   self->print_started = FALSE;
 }
 
-void kbar_statusbar_start_print(KBarStatusBar *self) {
+void kbar_statusbar_start_print(KBarStatusBar *self, gint stop_signal, gint cont_signal) {
   g_return_if_fail(KBAR_IS_STATUSBAR(self));
   g_return_if_fail(!self->print_started);
   json_builder_reset(self->builder);
@@ -137,9 +136,9 @@ void kbar_statusbar_start_print(KBarStatusBar *self) {
   json_builder_set_member_name(self->builder, "version");
   json_builder_add_int_value(self->builder, 1);
   json_builder_set_member_name(self->builder, "stop_signal");
-  json_builder_add_int_value(self->builder, SIGUSR1);
+  json_builder_add_int_value(self->builder, stop_signal);
   json_builder_set_member_name(self->builder, "cont_signal");
-  json_builder_add_int_value(self->builder, SIGUSR2);
+  json_builder_add_int_value(self->builder, cont_signal);
   json_builder_end_object(self->builder);
   JsonNode *node = json_builder_get_root(self->builder);
   if(!node) {

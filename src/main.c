@@ -47,7 +47,7 @@ int main(void) {
   KBarStatusBar *status_bar = kbar_statusbar_new();
   kbar_statusbar_add_widget(status_bar, KBAR_WIDGET(kbar_widget_time_new()));
   // Run loop
-  kbar_statusbar_start_print(status_bar);
+  kbar_statusbar_start_print(status_bar, SIGUSR1, SIGUSR2);
   kbar_statusbar_output_state(status_bar);
   g_main_loop_run(main_loop);
   kbar_statusbar_end_print(status_bar);
