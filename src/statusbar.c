@@ -112,6 +112,8 @@ static void kbar_status_bar_handle_change_notification([[maybe_unused]] GObject 
 }
 
 void kbar_statusbar_add_widget (KBarStatusBar *self, KBarWidget *widget) {
+  g_return_if_fail(KBAR_IS_STATUSBAR(self));
+  g_return_if_fail(KBAR_IS_WIDGET(widget));
   struct KBarStatusBarEntry new_entry;
   new_entry.widget = widget;
   new_entry.handler_id = g_signal_connect_after(new_entry.widget, "notify", G_CALLBACK(kbar_status_bar_handle_change_notification), self);
@@ -119,6 +121,7 @@ void kbar_statusbar_add_widget (KBarStatusBar *self, KBarWidget *widget) {
 }
 
 void kbar_statusbar_end_print(KBarStatusBar *self) {
+  g_return_if_fail(KBAR_IS_STATUSBAR(self));
   g_return_if_fail(self->print_started);
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, "[]]\n");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
@@ -126,6 +129,7 @@ void kbar_statusbar_end_print(KBarStatusBar *self) {
 }
 
 void kbar_statusbar_start_print(KBarStatusBar *self) {
+  g_return_if_fail(KBAR_IS_STATUSBAR(self));
   g_return_if_fail(!self->print_started);
   json_builder_reset(self->builder);
   json_builder_begin_object(self->builder);
@@ -151,6 +155,7 @@ void kbar_statusbar_start_print(KBarStatusBar *self) {
 }
 
 void kbar_statusbar_output_state (KBarStatusBar *self) {
+  g_return_if_fail(KBAR_IS_STATUSBAR(self));
   g_return_if_fail(self->print_started);
   json_builder_reset(self->builder);
   json_builder_begin_array(self->builder);
