@@ -73,13 +73,16 @@ static void kbar_widget_finalize(GObject *object) {
 }
 
 static JsonBuilder *kbar_widget_default_build_json(KBarWidget *self, JsonBuilder *builder) {
-  KBarWidgetPrivate *priv = kbar_widget_get_instance_private(self);
+  gchar *full_text = NULL;
+  gboolean urgent = FALSE;
+  g_object_get(self, "full-text", &full_text, "urgent", &urgent, NULL);
   builder = json_builder_begin_object(builder);
   builder = json_builder_set_member_name(builder, "urgent");
-  builder = json_builder_add_boolean_value(builder, priv->urgent);
+  builder = json_builder_add_boolean_value(builder, urgent);
   builder = json_builder_set_member_name(builder, "full_text");
-  builder = json_builder_add_string_value(builder, priv->text->str);
+  builder = json_builder_add_string_value(builder, full_text);
   builder = json_builder_end_object(builder);
+  g_free(full_text);
   return builder;
 }
 
