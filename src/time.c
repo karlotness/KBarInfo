@@ -62,25 +62,47 @@ static gboolean kbar_time_tick(void *data) {
   return G_SOURCE_REMOVE;
 }
 
+static gboolean kbar_widget_time_start(KBarWidget *self, [[maybe_unused]] GError **error) {
+  KBarWidgetTime *widget = KBAR_WIDGET_TIME(self);
+  g_return_val_if_fail(widget->time_timer == 0, TRUE);
+  widget->time_timer = 0;
+  kbar_time_tick(widget);
+  return TRUE;
+}
+
+static gboolean kbar_widget_time_stop(KBarWidget *self, [[maybe_unused]] GError **error) {
+  KBarWidgetTime *widget = KBAR_WIDGET_TIME(self);
+  gboolean ok = TRUE;
+  if(widget->time_timer != 0) {
+    ok &= g_source_remove(widget->time_timer);
+    widget->time_timer = 0;
+  }
+  if(!ok) {
+    // Report error
+    return FALSE;
+  }
+  else {
+    return TRUE;
+  }
+}
+
 G_DEFINE_FINAL_TYPE(KBarWidgetTime, kbar_widget_time, KBAR_TYPE_WIDGET)
 
 static void kbar_widget_time_dispose(GObject *object) {
-  KBarWidgetTime *self = KBAR_WIDGET_TIME(object);
-  if(self->time_timer != 0) {
-    g_source_remove(self->time_timer);
-    self->time_timer = 0;
-  }
+  kbar_widget_time_stop(KBAR_WIDGET(object), NULL);
   G_OBJECT_CLASS(kbar_widget_time_parent_class)->dispose(object);
 }
 
 static void kbar_widget_time_class_init (KBarWidgetTimeClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->dispose = kbar_widget_time_dispose;
+  KBarWidgetClass *widget_class = KBAR_WIDGET_CLASS(klass);
+  widget_class->start = kbar_widget_time_start;
+  widget_class->stop = kbar_widget_time_stop;
 }
 
 static void kbar_widget_time_init(KBarWidgetTime *self) {
   self->time_timer = 0;
-  kbar_time_tick(self);
 }
 
 KBarWidgetTime *kbar_widget_time_new(void) {
