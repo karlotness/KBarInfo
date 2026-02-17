@@ -38,31 +38,28 @@ static void kbar_volume_event_cb(pa_context *c, pa_subscription_event_type_t t, 
 static void kbar_volume_server_info_cb(pa_context *c, const pa_server_info *i, void *userdata);
 static void kbar_volume_sink_info_cb(pa_context *c, const pa_sink_info *i, int eol, void *userdata);
 static void kbar_volume_generic_success_cb(pa_context *c, int success, void *userdata);
+static gboolean kbar_widget_volume_start(KBarWidget *self, [[maybe_unused]] GError **error);
+static gboolean kbar_widget_volume_stop(KBarWidget *self, [[maybe_unused]] GError **error);
 
-static void kbar_widget_volume_finalize(GObject *object) {
-  KBarWidgetVolume *self = KBAR_WIDGET_VOLUME(object);
-  pa_context_disconnect(self->pa_ctx);
-  pa_glib_mainloop_free(self->pa_main);
-  self->pa_main = NULL;
-  pa_context_unref(self->pa_ctx);
-  self->pa_ctx = NULL;
-  G_OBJECT_CLASS(kbar_widget_volume_parent_class)->finalize(object);
+static void kbar_widget_volume_dispose(GObject *object) {
+  kbar_widget_volume_stop(KBAR_WIDGET(object), NULL);
+  G_OBJECT_CLASS(kbar_widget_volume_parent_class)->dispose(object);
 }
 
 static void kbar_widget_volume_class_init (KBarWidgetVolumeClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
-  object_class->finalize = kbar_widget_volume_finalize;
+  object_class->dispose = kbar_widget_volume_dispose;
+  KBarWidgetClass *widget_class = KBAR_WIDGET_CLASS(klass);
+  widget_class->start = kbar_widget_volume_start;
+  widget_class->stop = kbar_widget_volume_stop;
 }
 
 static void kbar_widget_volume_init(KBarWidgetVolume *self) {
   self->error = FALSE;
   self->mute = FALSE;
   self->vol_pct = 0;
-  self->pa_main = pa_glib_mainloop_new(NULL);
-  self->pa_ctx = pa_context_new(pa_glib_mainloop_get_api(self->pa_main), "kbarinfo");
-  pa_context_set_state_callback(self->pa_ctx, &kbar_volume_connection_cb, self);
-  pa_context_set_subscribe_callback(self->pa_ctx, &kbar_volume_event_cb, self);
-  pa_context_connect(self->pa_ctx, NULL, PA_CONTEXT_NOFLAGS, NULL);
+  self->pa_main = NULL;
+  self->pa_ctx = NULL;
 }
 
 KBarWidgetVolume *kbar_widget_volume_new(void) {
@@ -163,4 +160,32 @@ static void kbar_volume_update(KBarWidgetVolume *widget) {
   if(dynamic_text) {
     g_free(text);
   }
+}
+
+static gboolean kbar_widget_volume_start(KBarWidget *self, [[maybe_unused]] GError **error) {
+  KBarWidgetVolume *widget = KBAR_WIDGET_VOLUME(self);
+  g_return_val_if_fail(widget->pa_main == NULL, TRUE);
+  g_return_val_if_fail(widget->pa_ctx == NULL, TRUE);
+  widget->pa_main = pa_glib_mainloop_new(NULL);
+  widget->pa_ctx = pa_context_new(pa_glib_mainloop_get_api(widget->pa_main), "kbarinfo");
+  pa_context_set_state_callback(widget->pa_ctx, &kbar_volume_connection_cb, self);
+  pa_context_set_subscribe_callback(widget->pa_ctx, &kbar_volume_event_cb, self);
+  pa_context_connect(widget->pa_ctx, NULL, PA_CONTEXT_NOFLAGS, NULL);
+  return TRUE;
+}
+
+static gboolean kbar_widget_volume_stop(KBarWidget *self, [[maybe_unused]] GError **error) {
+  KBarWidgetVolume *widget = KBAR_WIDGET_VOLUME(self);
+  if(widget->pa_ctx) {
+    pa_context_disconnect(widget->pa_ctx);
+  }
+  if(widget->pa_main) {
+    pa_glib_mainloop_free(widget->pa_main);
+  }
+  if(widget->pa_ctx) {
+    pa_context_unref(widget->pa_ctx);
+  }
+  widget->pa_main = NULL;
+  widget->pa_ctx = NULL;
+  return TRUE;
 }
