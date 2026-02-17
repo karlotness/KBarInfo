@@ -28,10 +28,24 @@
 
 static GMainLoop *main_loop = NULL;
 
-static gboolean kbar_interrupt_handler([[maybe_unused]] void *data) {
+static gboolean kbar_idle_loop_start(void *data) {
+  KBarStatusBar *status_bar = data;
+  kbar_statusbar_start_print(status_bar, SIGUSR1, SIGUSR2);
+  kbar_statusbar_output_state(status_bar);
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean kbar_idle_loop_stop(void *data) {
+  KBarStatusBar *status_bar = data;
+  kbar_statusbar_end_print(status_bar);
   if(main_loop) {
     g_main_loop_quit(main_loop);
   }
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean kbar_interrupt_handler(void *data) {
+  g_idle_add(kbar_idle_loop_stop, data);
   return G_SOURCE_CONTINUE;
 }
 
@@ -41,18 +55,18 @@ static gboolean kbar_signal_ignore([[maybe_unused]] void *data) {
 
 int main(void) {
   main_loop = g_main_loop_new(NULL, FALSE);
-  guint sigint_id = g_unix_signal_add(SIGINT, kbar_interrupt_handler, NULL);
-  guint sigusr1_id = g_unix_signal_add(SIGUSR1, kbar_signal_ignore, NULL);
-  guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_ignore, NULL);
   // Construct widgets
   KBarStatusBar *status_bar = kbar_statusbar_new();
+  // Configure signal handlers
+  guint sigint_id = g_unix_signal_add(SIGINT, kbar_interrupt_handler, status_bar);
+  guint sigusr1_id = g_unix_signal_add(SIGUSR1, kbar_signal_ignore, NULL);
+  guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_ignore, NULL);
+  // Add widgets
   kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_volume_new()));
   kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_time_new()));
   // Run loop
-  kbar_statusbar_start_print(status_bar, SIGUSR1, SIGUSR2);
-  kbar_statusbar_output_state(status_bar);
+  g_idle_add(kbar_idle_loop_start, status_bar);
   g_main_loop_run(main_loop);
-  kbar_statusbar_end_print(status_bar);
   // Destroy widgets and return
   g_clear_object(&status_bar);
   g_source_remove(sigusr2_id);
