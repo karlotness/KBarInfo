@@ -125,6 +125,9 @@ void kbar_statusbar_end_print(KBarStatusBar *self) {
   g_return_if_fail(self->print_started);
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, "[]]\n");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
+  for(gsize i = 0; i < self->bar_entries->len; i++) {
+    kbar_widget_stop(g_array_index(self->bar_entries, struct KBarStatusBarEntry, i).widget, NULL);
+  }
   self->print_started = FALSE;
 }
 
@@ -151,6 +154,10 @@ void kbar_statusbar_start_print(KBarStatusBar *self, gint stop_signal, gint cont
   node = NULL;
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, "\n[");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
+  // Start all widgets
+  for(gsize i = 0; i < self->bar_entries->len; i++) {
+    kbar_widget_start(g_array_index(self->bar_entries, struct KBarStatusBarEntry, i).widget, NULL);
+  }
   self->print_started = TRUE;
 }
 
