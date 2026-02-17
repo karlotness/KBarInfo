@@ -24,6 +24,7 @@
 #include "statusbar.h"
 #include "widget.h"
 #include "time.h"
+#include "power.h"
 #include "volume.h"
 
 static GMainLoop *main_loop = NULL;
@@ -63,6 +64,7 @@ int main(void) {
   guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_ignore, NULL);
   // Add widgets
   kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_volume_new()));
+  kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_power_new()));
   kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_time_new()));
   // Run loop
   g_idle_add(kbar_idle_loop_start, status_bar);
