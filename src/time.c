@@ -20,10 +20,9 @@
 
 #include "time.h"
 
-#define KBAR_TIME_FMT "%a %b %d - %I:%M %p %Z"
-#define KBAR_TIME_MIN_SLEEP 5
-#define KBAR_TIME_MAX_SLEEP 60
-
+static const char *const kbar_time_fmt = "%a %b %d - %I:%M %p %Z";
+static const gint kbar_time_min_sleep = 5;
+static const gint kbar_time_max_sleep = 60;
 struct _KBarWidgetTime {
   KBarWidget parent_instance;
   guint time_timer;
@@ -39,16 +38,16 @@ static gboolean kbar_time_tick(void *data) {
   // Compute how long to sleep before next wakeup
   gint sec = g_date_time_get_second(g_time);
   gint wait_secs = 60 - sec;
-  if(wait_secs < KBAR_TIME_MIN_SLEEP) {
-    wait_secs = KBAR_TIME_MIN_SLEEP;
+  if(wait_secs < kbar_time_min_sleep) {
+    wait_secs = kbar_time_min_sleep;
   }
-  else if(wait_secs > KBAR_TIME_MAX_SLEEP) {
-    wait_secs = KBAR_TIME_MAX_SLEEP;
+  else if(wait_secs > kbar_time_max_sleep) {
+    wait_secs = kbar_time_max_sleep;
   }
   // Re-add timer call with new timeout
   self->time_timer = g_timeout_add_seconds((guint) wait_secs, &kbar_time_tick, data);
   // Produce new time string
-  gchar *time_str = g_date_time_format(g_time, KBAR_TIME_FMT);
+  gchar *time_str = g_date_time_format(g_time, kbar_time_fmt);
   if(!time_str) {
     g_printerr("Error producing time string\n");
     g_date_time_unref(g_time);

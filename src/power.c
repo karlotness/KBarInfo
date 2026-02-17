@@ -20,10 +20,10 @@
 
 #include "power.h"
 
-#define BATTERY_DBUS_NAME "org.freedesktop.UPower"
-#define BATTERY_INTERFACE "org.freedesktop.UPower.Device"
-#define BATTERY_PATH "/org/freedesktop/UPower/devices/DisplayDevice"
-#define BATTERY_CRITICAL_PCT 15
+static const char *const kbar_battery_dbus_name = "org.freedesktop.UPower";
+static const char *const kbar_battery_interface = "org.freedesktop.UPower.Device";
+static const char *const kbar_battery_path = "/org/freedesktop/UPower/devices/DisplayDevice";
+static const double kbar_battery_critical_pct = 15.0;
 
 struct _KBarWidgetPower {
   KBarWidget parent_instance;
@@ -73,7 +73,7 @@ static void kbar_widget_power_proxy_cb([[maybe_unused]] GObject *source_object, 
 }
 
 static gboolean kbar_widget_power_start(KBarWidget *self, [[maybe_unused]] GError **error) {
-  g_dbus_proxy_new_for_bus(G_BUS_TYPE_SYSTEM, G_DBUS_PROXY_FLAGS_NONE, NULL, BATTERY_DBUS_NAME, BATTERY_PATH, BATTERY_INTERFACE, NULL, kbar_widget_power_proxy_cb, self);
+  g_dbus_proxy_new_for_bus(G_BUS_TYPE_SYSTEM, G_DBUS_PROXY_FLAGS_NONE, NULL, kbar_battery_dbus_name, kbar_battery_path, kbar_battery_interface, NULL, kbar_widget_power_proxy_cb, self);
   return TRUE;
 }
 
@@ -113,7 +113,7 @@ static void kbar_power_update(KBarWidgetPower *self) {
   default:
     state_str = " ";
   }
-  gboolean urgent = pct <= BATTERY_CRITICAL_PCT;
+  gboolean urgent = pct <= kbar_battery_critical_pct;
   gchar *text = g_strdup_printf("P:%s%.0f%%", state_str, pct);
   g_object_set(self, "full-text", text, "urgent", urgent, NULL);
   g_free(text);
