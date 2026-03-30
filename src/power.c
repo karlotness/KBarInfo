@@ -102,7 +102,7 @@ static void kbar_power_update(KBarWidgetPower *self) {
   guint32 state_val = g_variant_get_uint32(state);
   g_variant_unref(percent);
   g_variant_unref(state);
-  gchar *state_str;
+  const gchar *state_str;
   switch(state_val) {
   case 1:
     state_str = "C ";
