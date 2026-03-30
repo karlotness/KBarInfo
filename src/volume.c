@@ -141,25 +141,20 @@ static void kbar_volume_generic_success_cb([[maybe_unused]] pa_context *c, int s
 }
 
 static void kbar_volume_update(KBarWidgetVolume *widget) {
-  gboolean urgent = widget->error;
-  gboolean dynamic_text = FALSE;
-  gchar *text = "";
+  const gboolean urgent = widget->error;
+  const gchar *text = "";
+  gchar *dynamic_text = NULL;
   if(widget->error) {
     text = "V: err";
-    dynamic_text = FALSE;
   }
   else if(widget->mute) {
     text = "V: M";
-    dynamic_text = FALSE;
   }
   else {
-    text = g_strdup_printf("V: %0.0f%%", widget->vol_pct);
-    dynamic_text = TRUE;
+    dynamic_text = g_strdup_printf("V: %0.0f%%", widget->vol_pct);
   }
-  g_object_set(widget, "full-text", text, "urgent", urgent, NULL);
-  if(dynamic_text) {
-    g_free(text);
-  }
+  g_object_set(widget, "full-text", (dynamic_text == NULL ? text : dynamic_text), "urgent", urgent, NULL);
+  g_free(dynamic_text);
 }
 
 static gboolean kbar_widget_volume_start(KBarWidget *self, [[maybe_unused]] GError **error) {
