@@ -112,7 +112,7 @@ static void kbar_volume_server_info_cb(pa_context *c, const pa_server_info *i, v
 static gdouble kbar_volume_to_percent(pa_volume_t vol) {
   // Conversion logic from pavucontrol
   // https://github.com/pulseaudio/pavucontrol/blob/574139c10e70b63874bcb75fe4cdfd1f4644ad68/src/channelwidget.cc
-  return ((gdouble) vol  * 100) / PA_VOLUME_NORM;
+  return ((gdouble) vol * 100) / PA_VOLUME_NORM;
 }
 
 static void kbar_volume_sink_info_cb([[maybe_unused]] pa_context *c, const pa_sink_info *i, int eol, void *userdata) {
