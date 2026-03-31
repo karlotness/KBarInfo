@@ -28,6 +28,10 @@ struct _KBarWidgetVolume {
   pa_context *pa_ctx;
   gboolean error, mute;
   gdouble vol_pct;
+  pa_volume_t vol_raw;
+  // Tracking previous values
+  pa_volume_t prev_volume;
+  gboolean prev_error, prev_mute, ever_set;
 };
 
 G_DEFINE_FINAL_TYPE(KBarWidgetVolume, kbar_widget_volume, KBAR_TYPE_WIDGET)
@@ -58,8 +62,13 @@ static void kbar_widget_volume_init(KBarWidgetVolume *self) {
   self->error = FALSE;
   self->mute = FALSE;
   self->vol_pct = 0;
+  self->vol_raw = 0;
   self->pa_main = NULL;
   self->pa_ctx = NULL;
+  self->prev_volume = 0;
+  self->prev_mute = FALSE;
+  self->prev_error = FALSE;
+  self->ever_set = FALSE;
 }
 
 KBarWidgetVolume *kbar_widget_volume_new(void) {
@@ -126,7 +135,8 @@ static void kbar_volume_sink_info_cb([[maybe_unused]] pa_context *c, const pa_si
     kbar_volume_update(widget);
     return;
   }
-  widget->vol_pct = kbar_volume_to_percent(pa_cvolume_avg(&(i->volume)));
+  widget->vol_raw = pa_cvolume_avg(&(i->volume));
+  widget->vol_pct = kbar_volume_to_percent(widget->vol_raw);
   widget->mute = i->mute;
   widget->error = FALSE;
   kbar_volume_update(widget);
@@ -141,6 +151,20 @@ static void kbar_volume_generic_success_cb([[maybe_unused]] pa_context *c, int s
 }
 
 static void kbar_volume_update(KBarWidgetVolume *widget) {
+  // Check if meaningful updates have happened
+  if(widget->ever_set &&
+     (widget->mute == widget->prev_mute) &&
+     (widget->error == widget->prev_error) &&
+     (widget->vol_raw == widget->prev_volume)) {
+    // Reported state has not changed
+    return;
+  }
+  // Store current state values
+  widget->prev_volume = widget->vol_raw;
+  widget->prev_error = widget->error;
+  widget->prev_mute = widget->mute;
+  widget->ever_set = TRUE;
+  // Build update string
   const gboolean urgent = widget->error;
   const gchar *text = "";
   gchar *dynamic_text = NULL;
@@ -159,6 +183,7 @@ static void kbar_volume_update(KBarWidgetVolume *widget) {
 
 static gboolean kbar_widget_volume_start(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetVolume *widget = KBAR_WIDGET_VOLUME(self);
+  widget->ever_set = FALSE;
   g_return_val_if_fail(widget->pa_main == NULL, TRUE);
   g_return_val_if_fail(widget->pa_ctx == NULL, TRUE);
   widget->pa_main = pa_glib_mainloop_new(NULL);
