@@ -27,7 +27,6 @@ struct _KBarWidgetVolume {
   pa_glib_mainloop *pa_main;
   pa_context *pa_ctx;
   gboolean error, mute;
-  gdouble vol_pct;
   pa_volume_t vol_raw;
   uint32_t default_sink_idx;
   // Tracking previous values
@@ -62,7 +61,6 @@ static void kbar_widget_volume_class_init (KBarWidgetVolumeClass *klass) {
 static void kbar_widget_volume_init(KBarWidgetVolume *self) {
   self->error = FALSE;
   self->mute = FALSE;
-  self->vol_pct = 0;
   self->vol_raw = 0;
   self->default_sink_idx = PA_INVALID_INDEX;
   self->pa_main = NULL;
@@ -152,7 +150,6 @@ static void kbar_volume_sink_info_cb([[maybe_unused]] pa_context *c, const pa_si
   }
   widget->default_sink_idx = i->index;
   widget->vol_raw = pa_cvolume_avg(&(i->volume));
-  widget->vol_pct = kbar_volume_to_percent(widget->vol_raw);
   widget->mute = i->mute;
   widget->error = FALSE;
   kbar_volume_update(widget);
@@ -191,7 +188,8 @@ static void kbar_volume_update(KBarWidgetVolume *widget) {
     text = "V: M";
   }
   else {
-    dynamic_text = g_strdup_printf("V: %0.0f%%", widget->vol_pct);
+    const gdouble vol_pct = kbar_volume_to_percent(widget->vol_raw);
+    dynamic_text = g_strdup_printf("V: %0.0f%%", vol_pct);
   }
   g_object_set(widget, "full-text", (dynamic_text == NULL ? text : dynamic_text), "urgent", urgent, NULL);
   g_free(dynamic_text);
