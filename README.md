@@ -6,7 +6,7 @@ Pretty rough but provides information on the current status of:
 - Battery charge (UPower)
 - Time
 
-Build with `make` and configure i3 to run the `kbarinfo`
+Build with [Meson](https://mesonbuild.com/) and configure i3 to run the `kbarinfo`
 executable. This program subscribes to updates on the system state
 over DBus.
 
