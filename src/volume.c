@@ -29,6 +29,7 @@ struct _KBarWidgetVolume {
   gboolean error, mute;
   gdouble vol_pct;
   pa_volume_t vol_raw;
+  uint32_t default_sink_idx;
   // Tracking previous values
   pa_volume_t prev_volume;
   gboolean prev_error, prev_mute, ever_set;
@@ -63,6 +64,7 @@ static void kbar_widget_volume_init(KBarWidgetVolume *self) {
   self->mute = FALSE;
   self->vol_pct = 0;
   self->vol_raw = 0;
+  self->default_sink_idx = PA_INVALID_INDEX;
   self->pa_main = NULL;
   self->pa_ctx = NULL;
   self->prev_volume = 0;
@@ -83,7 +85,7 @@ static void kbar_volume_connection_cb(pa_context *c, void *userdata) {
     pa_operation *op = pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK | PA_SUBSCRIPTION_MASK_SERVER, &kbar_volume_generic_success_cb, userdata);
     pa_operation_unref(op);
     // Get initial volume values (so we don't wait for change)
-    kbar_volume_event_cb(c, PA_SUBSCRIPTION_EVENT_SINK | PA_SUBSCRIPTION_EVENT_CHANGE, 0, userdata);
+    kbar_volume_event_cb(c, PA_SUBSCRIPTION_EVENT_SERVER | PA_SUBSCRIPTION_EVENT_CHANGE, PA_INVALID_INDEX, userdata);
   }
   else if(state != PA_CONTEXT_TERMINATED) {
     widget->error = TRUE;
@@ -94,16 +96,29 @@ static void kbar_volume_connection_cb(pa_context *c, void *userdata) {
 static void kbar_volume_event_cb(pa_context *c, pa_subscription_event_type_t t, [[maybe_unused]] uint32_t idx, void *userdata) {
   const pa_subscription_event_type_t event_source = t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK;
   const pa_subscription_event_type_t event_type = t & PA_SUBSCRIPTION_EVENT_TYPE_MASK;
-  if(event_source != PA_SUBSCRIPTION_EVENT_SINK && event_source != PA_SUBSCRIPTION_EVENT_SERVER) {
-    // Neither sink nor server event. Not interested
-    return;
+  KBarWidgetVolume *widget = KBAR_WIDGET_VOLUME(userdata);
+
+  // Process events
+  if(event_source == PA_SUBSCRIPTION_EVENT_SERVER && event_type == PA_SUBSCRIPTION_EVENT_CHANGE) {
+    // The default sink may have changed. Query and check
+    widget->default_sink_idx = PA_INVALID_INDEX;
+    pa_operation *op = pa_context_get_server_info(c, &kbar_volume_server_info_cb, userdata);
+    pa_operation_unref(op);
   }
-  if(event_type != PA_SUBSCRIPTION_EVENT_CHANGE) {
-    // Not a change event. Not interested
-    return;
+  else if (event_source == PA_SUBSCRIPTION_EVENT_SINK &&
+           event_type == PA_SUBSCRIPTION_EVENT_REMOVE &&
+           idx == widget->default_sink_idx) {
+    // The default sink was removed, reset and wait for server update
+    widget->default_sink_idx = PA_INVALID_INDEX;
   }
-  pa_operation *op = pa_context_get_server_info(c, &kbar_volume_server_info_cb, userdata);
-  pa_operation_unref(op);
+  else if(event_source == PA_SUBSCRIPTION_EVENT_SINK &&
+          event_type == PA_SUBSCRIPTION_EVENT_CHANGE &&
+          widget->default_sink_idx != PA_INVALID_INDEX &&
+          idx == widget->default_sink_idx) {
+    // The default sink changed, query new volume level
+    pa_operation *op = pa_context_get_sink_info_by_index(c, widget->default_sink_idx, &kbar_volume_sink_info_cb, userdata);
+    pa_operation_unref(op);
+  }
 }
 
 static void kbar_volume_server_info_cb(pa_context *c, const pa_server_info *i, void *userdata) {
@@ -135,6 +150,7 @@ static void kbar_volume_sink_info_cb([[maybe_unused]] pa_context *c, const pa_si
     kbar_volume_update(widget);
     return;
   }
+  widget->default_sink_idx = i->index;
   widget->vol_raw = pa_cvolume_avg(&(i->volume));
   widget->vol_pct = kbar_volume_to_percent(widget->vol_raw);
   widget->mute = i->mute;
@@ -183,6 +199,7 @@ static void kbar_volume_update(KBarWidgetVolume *widget) {
 
 static gboolean kbar_widget_volume_start(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetVolume *widget = KBAR_WIDGET_VOLUME(self);
+  widget->default_sink_idx = PA_INVALID_INDEX;
   widget->ever_set = FALSE;
   g_return_val_if_fail(widget->pa_main == NULL, TRUE);
   g_return_val_if_fail(widget->pa_ctx == NULL, TRUE);
