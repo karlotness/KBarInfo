@@ -28,7 +28,7 @@ struct _KBarWidgetNetwork {
   NMState state;
   GString *ssid, *vpn;
   gboolean state_error, network_error;
-  guint state_sig, conn_add_sig, conn_remove_sig;
+  gulong state_sig, conn_add_sig, conn_remove_sig;
 };
 
 G_DEFINE_FINAL_TYPE(KBarWidgetNetwork, kbar_widget_network, KBAR_TYPE_WIDGET)
