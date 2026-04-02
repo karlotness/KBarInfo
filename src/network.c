@@ -162,11 +162,15 @@ static void kbar_network_update(KBarWidgetNetwork *widget) {
       widget->ssid = g_string_assign(widget->ssid, "--");
     }
     const gchar *c_str = "";
-    if(widget->state != NM_STATE_CONNECTED_GLOBAL && widget->state != NM_STATE_CONNECTED_SITE && widget->state != NM_STATE_CONNECTED_LOCAL) {
-      c_str = "~ ";
-    }
-    else {
+    switch(widget->state) {
+    case NM_STATE_CONNECTED_GLOBAL:
+    case NM_STATE_CONNECTED_SITE:
+    case NM_STATE_CONNECTED_LOCAL:
       c_str = " ";
+      break;
+    default:
+      c_str = "~ ";
+      break;
     }
     if(widget->vpn->len > 0) {
       // VPN is connected
