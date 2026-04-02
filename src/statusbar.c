@@ -114,7 +114,7 @@ static void kbar_status_bar_handle_change_notification([[maybe_unused]] GObject 
 void kbar_statusbar_take_widget (KBarStatusBar *self, KBarWidget *widget) {
   g_return_if_fail(KBAR_IS_STATUSBAR(self));
   g_return_if_fail(KBAR_IS_WIDGET(widget));
-  struct KBarStatusBarEntry new_entry;
+  struct KBarStatusBarEntry new_entry = {0};
   new_entry.widget = widget;
   new_entry.handler_id = g_signal_connect_after(new_entry.widget, "notify", G_CALLBACK(kbar_status_bar_handle_change_notification), self);
   g_array_append_val(self->bar_entries, new_entry);
