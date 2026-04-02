@@ -79,13 +79,8 @@ static gboolean kbar_widget_power_start(KBarWidget *self, [[maybe_unused]] GErro
 
 static gboolean kbar_widget_power_stop(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetPower *widget = KBAR_WIDGET_POWER(self);
-  if(widget->batt_obj && widget->property_signal != 0u) {
-    g_signal_handler_disconnect(widget->batt_obj, widget->property_signal);
-    widget->property_signal = 0;
-  }
-  if(widget->batt_obj) {
-    g_clear_object(&widget->batt_obj);
-  }
+  g_clear_signal_handler(&widget->property_signal, G_OBJECT(widget->batt_obj));
+  g_clear_object(&widget->batt_obj);
   return TRUE;
 }
 

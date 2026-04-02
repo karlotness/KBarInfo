@@ -101,21 +101,10 @@ static gboolean kbar_widget_network_start(KBarWidget *self, [[maybe_unused]] GEr
 
 static gboolean kbar_widget_network_stop(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetNetwork *widget = KBAR_WIDGET_NETWORK(self);
-  if(widget->state_sig != 0) {
-    g_signal_handler_disconnect(widget->client, widget->state_sig);
-    widget->state_sig = 0;
-  }
-  if(widget->conn_add_sig != 0) {
-    g_signal_handler_disconnect(widget->client, widget->conn_add_sig);
-    widget->conn_add_sig = 0;
-  }
-  if(widget->conn_remove_sig != 0) {
-    g_signal_handler_disconnect(widget->client, widget->conn_remove_sig);
-    widget->conn_remove_sig = 0;
-  }
-  if(widget->client) {
-    g_clear_object(&widget->client);
-  }
+  g_clear_signal_handler(&widget->state_sig, G_OBJECT(widget->client));
+  g_clear_signal_handler(&widget->conn_add_sig, G_OBJECT(widget->client));
+  g_clear_signal_handler(&widget->conn_remove_sig, G_OBJECT(widget->client));
+  g_clear_object(&widget->client);
   return TRUE;
 }
 
