@@ -84,8 +84,7 @@ static gboolean kbar_widget_power_stop(KBarWidget *self, [[maybe_unused]] GError
     widget->property_signal = 0;
   }
   if(widget->batt_obj) {
-    g_object_unref(widget->batt_obj);
-    widget->batt_obj = NULL;
+    g_clear_object(&widget->batt_obj);
   }
   return TRUE;
 }

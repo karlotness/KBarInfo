@@ -114,8 +114,7 @@ static gboolean kbar_widget_network_stop(KBarWidget *self, [[maybe_unused]] GErr
     widget->conn_remove_sig = 0;
   }
   if(widget->client) {
-    g_object_unref(widget->client);
-    widget->client = NULL;
+    g_clear_object(&widget->client);
   }
   return TRUE;
 }
