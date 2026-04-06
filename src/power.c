@@ -92,6 +92,16 @@ static void kbar_power_update(KBarWidgetPower *self) {
   // Get current status values
   GVariant *percent = g_dbus_proxy_get_cached_property(self->batt_obj, "Percentage");
   GVariant *state = g_dbus_proxy_get_cached_property(self->batt_obj, "State");
+  if(!percent || !state) {
+    if(percent) {
+      g_variant_unref(percent);
+    }
+    if(state) {
+      g_variant_unref(state);
+    }
+    g_object_set(self, "full-text", "P: err", "urgent", TRUE, NULL);
+    return;
+  }
   double pct = g_variant_get_double(percent);
   guint32 state_val = g_variant_get_uint32(state);
   g_variant_unref(percent);
