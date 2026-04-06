@@ -68,7 +68,7 @@ static void kbar_widget_power_proxy_cb([[maybe_unused]] GObject *source_object, 
   }
   widget->batt_obj = proxy;
   // Connect signals
-  widget->property_signal = g_signal_connect_after(widget->batt_obj, "g-properties-changed", G_CALLBACK(kbar_power_signal), NULL);
+  widget->property_signal = g_signal_connect_after(widget->batt_obj, "g-properties-changed", G_CALLBACK(kbar_power_signal), widget);
   kbar_power_update(widget);
 }
 
