@@ -25,6 +25,7 @@ static const gint kbar_time_min_sleep = 5;
 static const gint kbar_time_max_sleep = 60;
 struct _KBarWidgetTime {
   KBarWidget parent_instance;
+  gboolean paused;
   guint time_timer;
 };
 
@@ -35,17 +36,23 @@ static gboolean kbar_time_tick(void *data) {
     g_printerr("Error getting current time\n");
     return G_SOURCE_CONTINUE;
   }
-  // Compute how long to sleep before next wakeup
-  gint sec = g_date_time_get_second(g_time);
-  gint wait_secs = 60 - sec;
-  if(wait_secs < kbar_time_min_sleep) {
-    wait_secs = kbar_time_min_sleep;
+  if(!self->paused) {
+    // Compute how long to sleep before next wakeup
+    gint sec = g_date_time_get_second(g_time);
+    gint wait_secs = 60 - sec;
+    if(wait_secs < kbar_time_min_sleep) {
+      wait_secs = kbar_time_min_sleep;
+    }
+    else if(wait_secs > kbar_time_max_sleep) {
+      wait_secs = kbar_time_max_sleep;
+    }
+    // Re-add timer call with new timeout
+    self->time_timer = g_timeout_add_seconds((guint) wait_secs, &kbar_time_tick, data);
   }
-  else if(wait_secs > kbar_time_max_sleep) {
-    wait_secs = kbar_time_max_sleep;
+  else {
+    // We are paused, don't set a new callback
+    self->time_timer = 0;
   }
-  // Re-add timer call with new timeout
-  self->time_timer = g_timeout_add_seconds((guint) wait_secs, &kbar_time_tick, data);
   // Produce new time string
   gchar *time_str = g_date_time_format(g_time, kbar_time_fmt);
   if(!time_str) {
@@ -85,6 +92,29 @@ static gboolean kbar_widget_time_stop(KBarWidget *self, [[maybe_unused]] GError 
   }
 }
 
+static gboolean kbar_widget_time_pause([[maybe_unused]] KBarWidget *self, [[maybe_unused]] GError **error) {
+  KBarWidgetTime *widget = KBAR_WIDGET_TIME(self);
+  if(widget->paused) {
+    return TRUE;
+  }
+  widget->paused = TRUE;
+  if(widget->time_timer != 0) {
+    g_source_remove(widget->time_timer);
+    widget->time_timer = 0;
+  }
+  return TRUE;
+}
+
+static gboolean kbar_widget_time_resume([[maybe_unused]] KBarWidget *self, [[maybe_unused]] GError **error) {
+  KBarWidgetTime *widget = KBAR_WIDGET_TIME(self);
+  if(!widget->paused) {
+    return TRUE;
+  }
+  widget->paused = FALSE;
+  kbar_time_tick(widget);
+  return TRUE;
+}
+
 G_DEFINE_FINAL_TYPE(KBarWidgetTime, kbar_widget_time, KBAR_TYPE_WIDGET)
 
 static void kbar_widget_time_dispose(GObject *object) {
@@ -98,10 +128,13 @@ static void kbar_widget_time_class_init (KBarWidgetTimeClass *klass) {
   KBarWidgetClass *widget_class = KBAR_WIDGET_CLASS(klass);
   widget_class->start = kbar_widget_time_start;
   widget_class->stop = kbar_widget_time_stop;
+  widget_class->pause = kbar_widget_time_pause;
+  widget_class->resume = kbar_widget_time_resume;
 }
 
 static void kbar_widget_time_init(KBarWidgetTime *self) {
   self->time_timer = 0;
+  self->paused = FALSE;
 }
 
 KBarWidgetTime *kbar_widget_time_new(void) {
