@@ -94,6 +94,14 @@ static gboolean kbar_widget_default_stop([[maybe_unused]] KBarWidget *self, [[ma
   return TRUE;
 }
 
+static gboolean kbar_widget_default_pause([[maybe_unused]] KBarWidget *self, [[maybe_unused]] GError **error) {
+  return TRUE;
+}
+
+static gboolean kbar_widget_default_resume([[maybe_unused]] KBarWidget *self, [[maybe_unused]] GError **error) {
+  return TRUE;
+}
+
 static void kbar_widget_class_init (KBarWidgetClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->set_property = kbar_widget_set_property;
@@ -102,6 +110,8 @@ static void kbar_widget_class_init (KBarWidgetClass *klass) {
   klass->build_json = kbar_widget_default_build_json;
   klass->start = kbar_widget_default_start;
   klass->stop = kbar_widget_default_stop;
+  klass->pause = kbar_widget_default_pause;
+  klass->resume = kbar_widget_default_resume;
   obj_properties[PROP_TEXT] = g_param_spec_string("full-text", "text", "Text to display for this block", "", G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   obj_properties[PROP_URGENT] = g_param_spec_boolean("urgent", NULL, "This block should be displayed as urgent", FALSE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_properties(object_class, N_PROPERTIES, obj_properties);
@@ -137,4 +147,18 @@ gboolean kbar_widget_stop(KBarWidget *self, GError **error) {
   KBarWidgetClass *klass = KBAR_WIDGET_GET_CLASS(self);
   g_return_val_if_fail(klass->stop != NULL, TRUE);
   return klass->stop(self, error);
+}
+
+gboolean kbar_widget_pause(KBarWidget *self, GError **error) {
+  g_return_val_if_fail(KBAR_IS_WIDGET(self), TRUE);
+  KBarWidgetClass *klass = KBAR_WIDGET_GET_CLASS(self);
+  g_return_val_if_fail(klass->pause != NULL, TRUE);
+  return klass->pause(self, error);
+}
+
+gboolean kbar_widget_resume(KBarWidget *self, GError **error) {
+  g_return_val_if_fail(KBAR_IS_WIDGET(self), TRUE);
+  KBarWidgetClass *klass = KBAR_WIDGET_GET_CLASS(self);
+  g_return_val_if_fail(klass->resume != NULL, TRUE);
+  return klass->resume(self, error);
 }

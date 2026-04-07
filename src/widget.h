@@ -35,12 +35,16 @@ struct _KBarWidgetClass {
   JsonBuilder *(*build_json)(KBarWidget *self, JsonBuilder *builder);
   gboolean (*start)(KBarWidget *self, GError **error);
   gboolean (*stop)(KBarWidget *self, GError **error);
+  gboolean (*pause)(KBarWidget *self, GError **error);
+  gboolean (*resume)(KBarWidget *self, GError **error);
 };
 
 KBarWidget *kbar_widget_new (void);
 JsonBuilder *kbar_widget_build_json(KBarWidget *self, JsonBuilder *builder);
 gboolean kbar_widget_start(KBarWidget *self, GError **error);
 gboolean kbar_widget_stop(KBarWidget *self, GError **error);
+gboolean kbar_widget_pause(KBarWidget *self, GError **error);
+gboolean kbar_widget_resume(KBarWidget *self, GError **error);
 
 G_END_DECLS
 
