@@ -51,7 +51,15 @@ static gboolean kbar_interrupt_handler(void *data) {
   return G_SOURCE_CONTINUE;
 }
 
-static gboolean kbar_signal_ignore([[maybe_unused]] void *data) {
+static gboolean kbar_signal_pause(void *data) {
+  KBarStatusBar *status_bar = data;
+  kbar_statusbar_pause(status_bar);
+  return G_SOURCE_CONTINUE;
+}
+
+static gboolean kbar_signal_resume(void *data) {
+  KBarStatusBar *status_bar = data;
+  kbar_statusbar_resume(status_bar);
   return G_SOURCE_CONTINUE;
 }
 
@@ -61,8 +69,8 @@ int main(void) {
   KBarStatusBar *status_bar = kbar_statusbar_new();
   // Configure signal handlers
   guint sigint_id = g_unix_signal_add(SIGINT, kbar_interrupt_handler, status_bar);
-  guint sigusr1_id = g_unix_signal_add(SIGUSR1, kbar_signal_ignore, NULL);
-  guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_ignore, NULL);
+  guint sigusr1_id = g_unix_signal_add(SIGUSR1, kbar_signal_pause, status_bar);
+  guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_resume, status_bar);
   // Add widgets
   kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_network_new()));
   kbar_statusbar_take_widget(status_bar, KBAR_WIDGET(kbar_widget_volume_new()));
