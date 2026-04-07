@@ -35,6 +35,8 @@ void kbar_statusbar_take_widget (KBarStatusBar *self, KBarWidget *widget);
 void kbar_statusbar_start_print(KBarStatusBar *self, gint stop_signal, gint cont_signal);
 void kbar_statusbar_end_print(KBarStatusBar *self);
 void kbar_statusbar_output_state (KBarStatusBar *self);
+void kbar_statusbar_pause(KBarStatusBar *self);
+void kbar_statusbar_resume(KBarStatusBar *self);
 
 G_END_DECLS
 

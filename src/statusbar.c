@@ -30,7 +30,7 @@ struct KBarStatusBarEntry {
 
 struct _KBarStatusBar {
   GObject parent_instance;
-  gboolean print_started;
+  gboolean print_started, paused;
   GArray *bar_entries;
   JsonBuilder *builder;
   JsonGenerator *generator;
@@ -81,6 +81,7 @@ static void kbar_statusbar_class_init(KBarStatusBarClass *klass) {
 
 static void kbar_statusbar_init(KBarStatusBar *self) {
   self->print_started = FALSE;
+  self->paused = FALSE;
   self->bar_entries = g_array_new(FALSE, FALSE, sizeof(struct KBarStatusBarEntry));
   self->idle_handler = 0;
   self->builder = json_builder_new_immutable();
@@ -96,7 +97,7 @@ KBarStatusBar *kbar_statusbar_new (void) {
 
 static gboolean kbar_statusbar_idle_output_state(gpointer user_data) {
   KBarStatusBar *bar = KBAR_STATUSBAR(user_data);
-  if(bar->print_started) {
+  if(bar->print_started && !bar->paused) {
     kbar_statusbar_output_state(bar);
   }
   bar->idle_handler = 0;
@@ -106,7 +107,7 @@ static gboolean kbar_statusbar_idle_output_state(gpointer user_data) {
 
 static void kbar_status_bar_handle_change_notification([[maybe_unused]] GObject *self, [[maybe_unused]] GParamSpec *pspec, gpointer user_data) {
   KBarStatusBar *bar = KBAR_STATUSBAR(user_data);
-  if(bar->idle_handler == 0) {
+  if(bar->idle_handler == 0 && !bar->paused) {
     bar->idle_handler = g_idle_add(kbar_statusbar_idle_output_state, g_object_ref(bar));
   }
 }
@@ -181,4 +182,27 @@ void kbar_statusbar_output_state (KBarStatusBar *self) {
   node = NULL;
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, ",\n");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
+}
+
+void kbar_statusbar_pause(KBarStatusBar *self) {
+  g_return_if_fail(KBAR_IS_STATUSBAR(self));
+  if(self->paused) {
+    return;
+  }
+  for(gsize i = 0; i < self->bar_entries->len; i++) {
+    kbar_widget_pause(g_array_index(self->bar_entries, struct KBarStatusBarEntry, i).widget, NULL);
+  }
+  self->paused = TRUE;
+}
+
+void kbar_statusbar_resume(KBarStatusBar *self) {
+  g_return_if_fail(KBAR_IS_STATUSBAR(self));
+  if(!self->paused) {
+    return;
+  }
+  for(gsize i = 0; i < self->bar_entries->len; i++) {
+    kbar_widget_resume(g_array_index(self->bar_entries, struct KBarStatusBarEntry, i).widget, NULL);
+  }
+  self->paused = FALSE;
+  kbar_statusbar_output_state(self);
 }
