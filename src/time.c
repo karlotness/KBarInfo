@@ -27,11 +27,13 @@ struct _KBarWidgetTime {
   KBarWidget parent_instance;
   gboolean paused;
   guint time_timer;
+  gint curr_interval;
 };
 
 static gboolean kbar_time_tick(void *data) {
   KBarWidgetTime *self = KBAR_WIDGET_TIME(data);
   GDateTime *g_time = g_date_time_new_now_local();
+  gboolean should_remove = FALSE;
   if(!g_time) {
     g_printerr("Error getting current time\n");
     return G_SOURCE_CONTINUE;
@@ -46,32 +48,43 @@ static gboolean kbar_time_tick(void *data) {
     else if(wait_secs > kbar_time_max_sleep) {
       wait_secs = kbar_time_max_sleep;
     }
-    // Re-add timer call with new timeout
-    self->time_timer = g_timeout_add_seconds((guint) wait_secs, &kbar_time_tick, data);
+    if(wait_secs != self->curr_interval) {
+      // Need to adjust the timeout
+      should_remove = TRUE;
+      self->time_timer = g_timeout_add_seconds((guint) wait_secs, &kbar_time_tick, data);
+      self->curr_interval = wait_secs;
+    }
+    else {
+      // Current timeout is ok
+      should_remove = FALSE;
+    }
   }
   else {
     // We are paused, don't set a new callback
     self->time_timer = 0;
+    self->curr_interval = -1;
+    should_remove = TRUE;
   }
   // Produce new time string
   gchar *time_str = g_date_time_format(g_time, kbar_time_fmt);
   if(!time_str) {
     g_printerr("Error producing time string\n");
     g_date_time_unref(g_time);
-    return G_SOURCE_REMOVE;
+    return (should_remove ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE);
   }
   // Set new value
   g_object_set(self, "full-text", time_str, NULL);
   // Free allocated values
   g_free(time_str);
   g_date_time_unref(g_time);
-  return G_SOURCE_REMOVE;
+  return (should_remove ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE);
 }
 
 static gboolean kbar_widget_time_start(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetTime *widget = KBAR_WIDGET_TIME(self);
   g_return_val_if_fail(widget->time_timer == 0, TRUE);
   widget->time_timer = 0;
+  widget->curr_interval = -1;
   kbar_time_tick(widget);
   return TRUE;
 }
@@ -82,6 +95,7 @@ static gboolean kbar_widget_time_stop(KBarWidget *self, [[maybe_unused]] GError 
   if(widget->time_timer != 0) {
     ok &= g_source_remove(widget->time_timer);
     widget->time_timer = 0;
+    widget->curr_interval = -1;
   }
   if(!ok) {
     // Report error
@@ -101,6 +115,7 @@ static gboolean kbar_widget_time_pause([[maybe_unused]] KBarWidget *self, [[mayb
   if(widget->time_timer != 0) {
     g_source_remove(widget->time_timer);
     widget->time_timer = 0;
+    widget->curr_interval = -1;
   }
   return TRUE;
 }
@@ -111,6 +126,7 @@ static gboolean kbar_widget_time_resume([[maybe_unused]] KBarWidget *self, [[may
     return TRUE;
   }
   widget->paused = FALSE;
+  widget->curr_interval = -1;
   kbar_time_tick(widget);
   return TRUE;
 }
@@ -135,6 +151,7 @@ static void kbar_widget_time_class_init (KBarWidgetTimeClass *klass) {
 static void kbar_widget_time_init(KBarWidgetTime *self) {
   self->time_timer = 0;
   self->paused = FALSE;
+  self->curr_interval = -1;
 }
 
 KBarWidgetTime *kbar_widget_time_new(void) {
