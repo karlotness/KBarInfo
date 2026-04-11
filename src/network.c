@@ -121,8 +121,8 @@ static void kbar_network_nm_conn_cb([[maybe_unused]] NMClient *cb_client, [[mayb
   if(!connections) {
     goto error;
   }
-  widget->vpn = g_string_set_size(widget->vpn, 0);
-  widget->ssid = g_string_set_size(widget->ssid, 0);
+  widget->vpn = g_string_truncate(widget->vpn, 0);
+  widget->ssid = g_string_truncate(widget->ssid, 0);
   for(guint i = 0; i < connections->len; i++) {
     NMActiveConnection *conn = g_ptr_array_index(connections, i);
     if(!conn) {
