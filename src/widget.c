@@ -39,7 +39,8 @@ static void kbar_widget_set_property(GObject *object, guint prop_id, const GValu
   KBarWidgetPrivate *priv = kbar_widget_get_instance_private(KBAR_WIDGET(object));
   switch(prop_id) {
   case PROP_TEXT:
-    g_string_assign(priv->text, g_value_get_string(value));
+    const gchar *const str = g_value_get_string(value);
+    g_string_assign(priv->text, (str ? str : ""));
     break;
   case PROP_URGENT:
     priv->urgent = g_value_get_boolean(value);
