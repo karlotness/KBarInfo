@@ -36,7 +36,7 @@ G_DEFINE_FINAL_TYPE(KBarWidgetNetwork, kbar_widget_network, KBAR_TYPE_WIDGET)
 static void kbar_network_update(KBarWidgetNetwork *widget);
 static gboolean kbar_widget_network_start(KBarWidget *self, [[maybe_unused]] GError **error);
 static gboolean kbar_widget_network_stop(KBarWidget *self, [[maybe_unused]] GError **error);
-static void kbar_network_nm_state_cb(GDBusProxy *proxy, GVariant *changed, GStrv *invalid, gpointer userdata);
+static void kbar_network_nm_state_cb([[maybe_unused]] GObject *self, [[maybe_unused]] GParamSpec *pspec, gpointer userdata);
 static void kbar_network_nm_conn_cb(NMClient *cb_client, NMActiveConnection *active_connection, gpointer userdata);
 
 static void kbar_widget_network_dispose(GObject *object) {
@@ -94,7 +94,7 @@ static gboolean kbar_widget_network_start(KBarWidget *self, [[maybe_unused]] GEr
   widget->conn_add_sig = g_signal_connect_after(widget->client, "active-connection-added", G_CALLBACK(kbar_network_nm_conn_cb), self);
   widget->conn_remove_sig = g_signal_connect_after(widget->client, "active-connection-removed", G_CALLBACK(kbar_network_nm_conn_cb), self);
   // Perform initial updates
-  kbar_network_nm_state_cb(NULL, NULL, NULL, self);
+  kbar_network_nm_state_cb(NULL, NULL, self);
   kbar_network_nm_conn_cb(NULL, NULL, self);
   return TRUE;
 }
@@ -108,7 +108,7 @@ static gboolean kbar_widget_network_stop(KBarWidget *self, [[maybe_unused]] GErr
   return TRUE;
 }
 
-static void kbar_network_nm_state_cb([[maybe_unused]] GDBusProxy *proxy, [[maybe_unused]] GVariant *changed, [[maybe_unused]] GStrv *invalid, gpointer userdata) {
+static void kbar_network_nm_state_cb([[maybe_unused]] GObject *self, [[maybe_unused]] GParamSpec *pspec, gpointer userdata) {
   KBarWidgetNetwork *widget = KBAR_WIDGET_NETWORK(userdata);
   widget->state = nm_client_get_state(widget->client);
   widget->state_error = FALSE;
