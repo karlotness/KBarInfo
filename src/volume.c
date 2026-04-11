@@ -213,14 +213,12 @@ static gboolean kbar_widget_volume_stop(KBarWidget *self, [[maybe_unused]] GErro
   KBarWidgetVolume *widget = KBAR_WIDGET_VOLUME(self);
   if(widget->pa_ctx) {
     pa_context_disconnect(widget->pa_ctx);
+    pa_context_unref(widget->pa_ctx);
+    widget->pa_ctx = NULL;
   }
   if(widget->pa_main) {
     pa_glib_mainloop_free(widget->pa_main);
+    widget->pa_main = NULL;
   }
-  if(widget->pa_ctx) {
-    pa_context_unref(widget->pa_ctx);
-  }
-  widget->pa_main = NULL;
-  widget->pa_ctx = NULL;
   return TRUE;
 }
