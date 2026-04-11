@@ -166,6 +166,7 @@ static void kbar_network_update(KBarWidgetNetwork *widget) {
     case NM_STATE_CONNECTED_GLOBAL:
     case NM_STATE_CONNECTED_SITE:
     case NM_STATE_CONNECTED_LOCAL:
+    case NM_STATE_DISCONNECTED:
       c_str = " ";
       break;
     default:
