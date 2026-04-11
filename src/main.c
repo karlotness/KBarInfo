@@ -80,10 +80,10 @@ int main(void) {
   g_idle_add(kbar_idle_loop_start, status_bar);
   g_main_loop_run(main_loop);
   // Destroy widgets and return
-  g_clear_object(&status_bar);
   g_source_remove(sigusr2_id);
   g_source_remove(sigusr1_id);
   g_source_remove(sigint_id);
+  g_clear_object(&status_bar);
   g_main_loop_unref(main_loop);
   main_loop = NULL;
   return 0;
