@@ -62,6 +62,9 @@ static void kbar_power_signal([[maybe_unused]] GDBusProxy *proxy, [[maybe_unused
 static void kbar_widget_power_proxy_cb([[maybe_unused]] GObject *source_object, GAsyncResult *res, gpointer data) {
   KBarWidgetPower *widget = KBAR_WIDGET_POWER(data);
   GDBusProxy *proxy = g_dbus_proxy_new_for_bus_finish(res, NULL);
+  if(!proxy) {
+    return;
+  }
   if(widget->batt_obj) {
     g_object_unref(proxy);
     return;
