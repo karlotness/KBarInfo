@@ -36,6 +36,7 @@ G_DEFINE_FINAL_TYPE(KBarWidgetNetwork, kbar_widget_network, KBAR_TYPE_WIDGET)
 static void kbar_network_update(KBarWidgetNetwork *widget);
 static gboolean kbar_widget_network_start(KBarWidget *self, [[maybe_unused]] GError **error);
 static gboolean kbar_widget_network_stop(KBarWidget *self, [[maybe_unused]] GError **error);
+static void kbar_widget_network_client_finish(GObject *source_object, GAsyncResult *res, gpointer data);
 static void kbar_network_nm_state_cb([[maybe_unused]] GObject *self, [[maybe_unused]] GParamSpec *pspec, gpointer userdata);
 static void kbar_network_nm_conn_cb(NMClient *cb_client, NMActiveConnection *active_connection, gpointer userdata);
 
@@ -80,14 +81,27 @@ KBarWidgetNetwork *kbar_widget_network_new(void) {
 
 static gboolean kbar_widget_network_start(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetNetwork *widget = KBAR_WIDGET_NETWORK(self);
-  widget->client = nm_client_new(NULL, NULL);
+  widget->client = NULL;
   widget->state = NM_STATE_UNKNOWN;
-  widget->ssid = g_string_set_size(widget->ssid, 0);
-  widget->vpn = g_string_set_size(widget->vpn, 0);
-  widget->state_error = FALSE;
-  widget->network_error = FALSE;
+  widget->ssid = g_string_truncate(widget->ssid, 0);
+  widget->vpn = g_string_truncate(widget->vpn, 0);
+  widget->state_error = TRUE;
+  widget->network_error = TRUE;
+  nm_client_new_async(NULL, kbar_widget_network_client_finish, self);
+  // Perform initial update
+  kbar_network_update(widget);
+  return TRUE;
+}
+
+static void kbar_widget_network_client_finish([[maybe_unused]] GObject *source_object, GAsyncResult *res, gpointer data) {
+  KBarWidget *self = data;
+  KBarWidgetNetwork *widget = KBAR_WIDGET_NETWORK(self);
+  widget->client = nm_client_new_finish(res, NULL);
   if(!widget->client) {
-    return FALSE;
+    widget->state_error = TRUE;
+    widget->network_error = TRUE;
+    kbar_network_update(widget);
+    return;
   }
   // Connect signals
   widget->state_sig = g_signal_connect_after(widget->client, "notify::state", G_CALLBACK(kbar_network_nm_state_cb), self);
@@ -96,7 +110,6 @@ static gboolean kbar_widget_network_start(KBarWidget *self, [[maybe_unused]] GEr
   // Perform initial updates
   kbar_network_nm_state_cb(NULL, NULL, self);
   kbar_network_nm_conn_cb(NULL, NULL, self);
-  return TRUE;
 }
 
 static gboolean kbar_widget_network_stop(KBarWidget *self, [[maybe_unused]] GError **error) {
