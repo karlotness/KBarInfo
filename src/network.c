@@ -176,14 +176,12 @@ static void kbar_network_update(KBarWidgetNetwork *widget) {
     }
     const gchar *c_str = "";
     switch(widget->state) {
-    case NM_STATE_CONNECTED_GLOBAL:
-    case NM_STATE_CONNECTED_SITE:
-    case NM_STATE_CONNECTED_LOCAL:
-    case NM_STATE_DISCONNECTED:
-      c_str = " ";
+    case NM_STATE_DISCONNECTING:
+    case NM_STATE_CONNECTING:
+      c_str = "~ ";
       break;
     default:
-      c_str = "~ ";
+      c_str = " ";
       break;
     }
     if(widget->vpn->len > 0) {
