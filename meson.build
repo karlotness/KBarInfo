@@ -28,6 +28,7 @@ deps = [
     dependency('gio-unix-2.0'),
     dependency('libpulse-mainloop-glib'),
     dependency('libnm'),
+    dependency('upower-glib'),
     dependency('json-glib-1.0'),
 ]
 

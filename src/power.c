@@ -19,16 +19,15 @@
  */
 
 #include "power.h"
+#include <upower.h>
 
-static const char *const kbar_battery_dbus_name = "org.freedesktop.UPower";
-static const char *const kbar_battery_interface = "org.freedesktop.UPower.Device";
-static const char *const kbar_battery_path = "/org/freedesktop/UPower/devices/DisplayDevice";
 static const double kbar_battery_critical_pct = 15.0;
 
 struct _KBarWidgetPower {
   KBarWidget parent_instance;
-  GDBusProxy *batt_obj;
-  gulong property_signal;
+  UpClient *client;
+  UpDevice *display_device;
+  gulong percentage_signal, state_signal;
 };
 
 G_DEFINE_FINAL_TYPE(KBarWidgetPower, kbar_widget_power, KBAR_TYPE_WIDGET)
@@ -51,39 +50,45 @@ static void kbar_widget_power_class_init (KBarWidgetPowerClass *klass) {
 }
 
 static void kbar_widget_power_init(KBarWidgetPower *self) {
-  self->batt_obj = NULL;
-  self->property_signal = 0;
+  self->client = NULL;
+  self->display_device = NULL;
+  self->percentage_signal = 0;
+  self->state_signal = 0;
 }
 
-static void kbar_power_signal([[maybe_unused]] GDBusProxy *proxy, [[maybe_unused]] GVariant *changed, [[maybe_unused]] GStrv *invalid, gpointer data) {
+static void kbar_power_signal([[maybe_unused]] GObject *self, [[maybe_unused]] GParamSpec *pspec, gpointer data) {
   kbar_power_update(KBAR_WIDGET_POWER(data));
 }
 
 static void kbar_widget_power_proxy_cb([[maybe_unused]] GObject *source_object, GAsyncResult *res, gpointer data) {
   KBarWidgetPower *widget = KBAR_WIDGET_POWER(data);
-  GDBusProxy *proxy = g_dbus_proxy_new_for_bus_finish(res, NULL);
-  if(!proxy) {
+  UpClient *client = up_client_new_finish(res, NULL);
+  if(!client) {
     return;
   }
-  if(widget->batt_obj) {
-    g_object_unref(proxy);
+  if(widget->client) {
+    g_object_unref(client);
     return;
   }
-  widget->batt_obj = proxy;
+  widget->client = client;
+  widget->display_device = up_client_get_display_device(widget->client);
   // Connect signals
-  widget->property_signal = g_signal_connect_after(widget->batt_obj, "g-properties-changed", G_CALLBACK(kbar_power_signal), widget);
+  widget->percentage_signal = g_signal_connect_after(widget->display_device, "notify::percentage", G_CALLBACK(kbar_power_signal), widget);
+  widget->state_signal = g_signal_connect_after(widget->display_device, "notify::state", G_CALLBACK(kbar_power_signal), widget);
   kbar_power_update(widget);
 }
 
 static gboolean kbar_widget_power_start(KBarWidget *self, [[maybe_unused]] GError **error) {
-  g_dbus_proxy_new_for_bus(G_BUS_TYPE_SYSTEM, G_DBUS_PROXY_FLAGS_NONE, NULL, kbar_battery_dbus_name, kbar_battery_path, kbar_battery_interface, NULL, kbar_widget_power_proxy_cb, self);
+  up_client_new_async(NULL, kbar_widget_power_proxy_cb, self);
   return TRUE;
 }
 
 static gboolean kbar_widget_power_stop(KBarWidget *self, [[maybe_unused]] GError **error) {
   KBarWidgetPower *widget = KBAR_WIDGET_POWER(self);
-  g_clear_signal_handler(&widget->property_signal, G_OBJECT(widget->batt_obj));
-  g_clear_object(&widget->batt_obj);
+  g_clear_signal_handler(&widget->state_signal, G_OBJECT(widget->display_device));
+  g_clear_signal_handler(&widget->percentage_signal, G_OBJECT(widget->display_device));
+  g_clear_object(&widget->display_device);
+  g_clear_object(&widget->client);
   return TRUE;
 }
 
@@ -93,28 +98,15 @@ KBarWidgetPower *kbar_widget_power_new(void) {
 
 static void kbar_power_update(KBarWidgetPower *self) {
   // Get current status values
-  GVariant *percent = g_dbus_proxy_get_cached_property(self->batt_obj, "Percentage");
-  GVariant *state = g_dbus_proxy_get_cached_property(self->batt_obj, "State");
-  if(!percent || !state) {
-    if(percent) {
-      g_variant_unref(percent);
-    }
-    if(state) {
-      g_variant_unref(state);
-    }
-    g_object_set(self, "full-text", "P: err", "urgent", TRUE, NULL);
-    return;
-  }
-  double pct = g_variant_get_double(percent);
-  guint32 state_val = g_variant_get_uint32(state);
-  g_variant_unref(percent);
-  g_variant_unref(state);
+  double pct = 0;
+  guint state_val = 0;
+  g_object_get(self->display_device, "percentage", &pct, "state", &state_val, NULL);
   const gchar *state_str = "";
   switch(state_val) {
-  case 1:
+  case UP_DEVICE_STATE_CHARGING:
     state_str = "C ";
     break;
-  case 4:
+  case UP_DEVICE_STATE_FULLY_CHARGED:
     state_str = "F ";
     break;
   default:
