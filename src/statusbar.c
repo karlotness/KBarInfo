@@ -48,7 +48,7 @@ static void kbar_statusbar_dispose(GObject *object) {
     g_clear_signal_handler(&entry->handler_id, G_OBJECT(entry->widget));
     g_clear_object(&entry->widget);
   }
-  g_array_remove_range(self->bar_entries, 0, self->bar_entries->len);
+  g_array_set_size(self->bar_entries, 0);
   // Remove idle handlers
   if(self->idle_handler != 0) {
     g_source_remove(self->idle_handler);
