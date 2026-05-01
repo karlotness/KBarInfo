@@ -28,6 +28,9 @@
 #include "volume.h"
 #include "network.h"
 
+static const gint kbar_sig_pause = SIGUSR1;
+static const gint kbar_sig_resume = SIGUSR2;
+
 struct KBarMainState {
   GMainLoop *main_loop;
   KBarStatusBar *status_bar;
@@ -35,7 +38,7 @@ struct KBarMainState {
 
 static gboolean kbar_idle_loop_start(void *data) {
   KBarStatusBar *status_bar = data;
-  kbar_statusbar_start_print(status_bar, SIGUSR1, SIGUSR2);
+  kbar_statusbar_start_print(status_bar, kbar_sig_pause, kbar_sig_resume);
   kbar_statusbar_output_state(status_bar);
   return G_SOURCE_REMOVE;
 }
@@ -49,13 +52,13 @@ static gboolean kbar_interrupt_handler(void *data) {
   return G_SOURCE_CONTINUE;
 }
 
-static gboolean kbar_signal_pause(void *data) {
+static gboolean kbar_pause_handler(void *data) {
   KBarStatusBar *status_bar = data;
   kbar_statusbar_pause(status_bar);
   return G_SOURCE_CONTINUE;
 }
 
-static gboolean kbar_signal_resume(void *data) {
+static gboolean kbar_resume_handler(void *data) {
   KBarStatusBar *status_bar = data;
   kbar_statusbar_resume(status_bar);
   return G_SOURCE_CONTINUE;
@@ -68,8 +71,8 @@ int main(void) {
   main_state.status_bar = kbar_statusbar_new();
   // Configure signal handlers
   guint sigint_id = g_unix_signal_add(SIGINT, kbar_interrupt_handler, &main_state);
-  guint sigusr1_id = g_unix_signal_add(SIGUSR1, kbar_signal_pause, main_state.status_bar);
-  guint sigusr2_id = g_unix_signal_add(SIGUSR2, kbar_signal_resume, main_state.status_bar);
+  guint sigpause_id = g_unix_signal_add(kbar_sig_pause, kbar_pause_handler, main_state.status_bar);
+  guint sigresume_id = g_unix_signal_add(kbar_sig_resume, kbar_resume_handler, main_state.status_bar);
   // Add widgets
   kbar_statusbar_take_widget(main_state.status_bar, KBAR_WIDGET(kbar_widget_network_new()));
   kbar_statusbar_take_widget(main_state.status_bar, KBAR_WIDGET(kbar_widget_volume_new()));
@@ -79,8 +82,8 @@ int main(void) {
   g_idle_add(kbar_idle_loop_start, main_state.status_bar);
   g_main_loop_run(main_state.main_loop);
   // Destroy widgets and return
-  g_source_remove(sigusr2_id);
-  g_source_remove(sigusr1_id);
+  g_source_remove(sigresume_id);
+  g_source_remove(sigpause_id);
   g_source_remove(sigint_id);
   g_clear_object(&main_state.status_bar);
   g_main_loop_unref(main_state.main_loop);
