@@ -8,7 +8,7 @@ project(
 
 cc = meson.get_compiler('c')
 
-extra_args = cc.get_supported_arguments('-fstack-protector-strong', '-fstack-clash-protection', '-fcf-protection=full')
+extra_args = cc.get_supported_arguments('-fstack-protector-strong', '-fstack-clash-protection', '-fcf-protection=full', '-fno-plt')
 add_project_arguments(extra_args, language: 'c')
 add_project_arguments('-D_FORTIFY_SOURCE=3', language: 'c')
 
