@@ -150,10 +150,9 @@ void kbar_statusbar_start_print(KBarStatusBar *self, gint stop_signal, gint cont
     g_printerr("Error generating initial JSON object.\n");
     return;
   }
-  json_generator_set_root(self->generator, node);
-  json_generator_to_stream(self->generator, self->stdout_stream, NULL, NULL);
-  json_node_unref(node);
+  json_generator_take_root(self->generator, node);
   node = NULL;
+  json_generator_to_stream(self->generator, self->stdout_stream, NULL, NULL);
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, "\n[");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
   // Start all widgets
@@ -177,10 +176,9 @@ void kbar_statusbar_output_state (KBarStatusBar *self) {
     g_printerr("Error generating status JSON object.\n");
     return;
   }
-  json_generator_set_root(self->generator, node);
-  json_generator_to_stream(self->generator, self->stdout_stream, NULL, NULL);
-  json_node_unref(node);
+  json_generator_take_root(self->generator, node);
   node = NULL;
+  json_generator_to_stream(self->generator, self->stdout_stream, NULL, NULL);
   g_output_stream_printf(self->stdout_stream, NULL, NULL, NULL, ",\n");
   g_output_stream_flush(self->stdout_stream, NULL, NULL);
 }
