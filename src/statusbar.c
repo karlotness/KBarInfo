@@ -56,6 +56,7 @@ static void kbar_statusbar_dispose(GObject *object) {
   }
   // Reset JSON writers
   json_builder_reset(self->builder);
+  json_generator_take_root(self->generator, NULL);
   // Process parent class
   G_OBJECT_CLASS(kbar_statusbar_parent_class)->dispose(object);
 }
