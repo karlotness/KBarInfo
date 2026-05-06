@@ -102,14 +102,13 @@ static gboolean kbar_statusbar_idle_output_state(gpointer user_data) {
     kbar_statusbar_output_state(bar);
   }
   bar->idle_handler = 0;
-  g_object_unref(bar);
   return G_SOURCE_REMOVE;
 }
 
 static void kbar_status_bar_handle_change_notification([[maybe_unused]] GObject *self, [[maybe_unused]] GParamSpec *pspec, gpointer user_data) {
   KBarStatusBar *bar = KBAR_STATUSBAR(user_data);
   if(bar->idle_handler == 0 && !bar->paused) {
-    bar->idle_handler = g_idle_add(kbar_statusbar_idle_output_state, g_object_ref(bar));
+    bar->idle_handler = g_idle_add(kbar_statusbar_idle_output_state, bar);
   }
 }
 
